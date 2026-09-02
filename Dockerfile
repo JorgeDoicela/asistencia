@@ -1,7 +1,8 @@
 FROM php:8.2-apache
 
-# Habilitar mod_rewrite de Apache
-RUN a2enmod rewrite
+# Habilitar mod_rewrite de Apache y AllowOverride para .htaccess
+RUN a2enmod rewrite \
+    && sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
 # Instalar extensiones requeridas para MySQL (PDO MySQL)
 RUN docker-php-ext-install pdo pdo_mysql

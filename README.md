@@ -1,42 +1,99 @@
-# Sistema de Asistencia QR (Docente)
+# Sistema de Asistencia QR - ISTPET (Arquitectura MVC Clasica)
 
-Sistema web sencillo en HTML, CSS, JS y PHP para que un docente genere un código QR
-de asistencia y los estudiantes registren su asistencia escaneándolo. Pensado para
-correr en XAMPP (Apache + MySQL).
+Sistema web educativo desarrollado bajo el patron **Modelo - Vista - Controlador (MVC)**, disenado para el registro y monitoreo de asistencia mediante codigos QR en tiempo real.
 
-## Instalación
+Estructurado de forma intuitiva y didactica para estudiantes de tercer semestre de desarrollo de software.
 
-1. Copia la carpeta `asistencia_qr` dentro de `htdocs` de tu XAMPP
-   (ejemplo: `C:\xampp\htdocs\asistencia_qr`).
-2. Abre phpMyAdmin (http://localhost/phpmyadmin) y crea la base de datos
-   importando el archivo `database.sql` (Importar > seleccionar archivo > Continuar).
-   Esto crea las tablas y un docente de prueba.
-3. Verifica los datos de conexión en `includes/db.php` (por defecto usuario `root`
-   sin contraseña, que es lo normal en XAMPP).
-4. Inicia Apache y MySQL desde el panel de XAMPP.
-5. Entra a: http://localhost/asistencia_qr/
+---
 
-## Acceso de prueba
+## Estructura del Proyecto (MVC)
 
-- Usuario: `profesor`
-- Contraseña: `12345`
+```text
+asistencia/
+├── config/
+│   └── Database.php            # Conexion simple y segura mediante PDO
+├── models/                     # MODELOS: Consultas SQL y logica de datos
+│   ├── Docente.php             # Login y busqueda de docentes
+│   ├── Estudiante.php          # CRUD completo del catalogo de alumnos
+│   ├── Sesion.php              # Creacion, cierre y QR de clases
+│   └── Asistencia.php          # Registro de escaneo, filtros y conteos
+├── controllers/                # CONTROLADORES: Reciben datos y llaman a los modelos
+│   ├── BaseController.php      # Metodos auxiliares para cargar vistas y redirigir
+│   ├── HomeController.php      # Pantalla de bienvenida e institucional
+│   ├── AuthController.php      # Inicio y cierre de sesion (docente y alumno)
+│   ├── DashboardController.php # Panel de control en vivo y generador QR
+│   ├── EstudianteController.php# Administracion de alumnos y portal estudiantil
+│   ├── AsistenciaController.php# Confirmacion del QR y API de tiempo real
+│   └── ReporteController.php   # Filtros de fecha y descarga en Excel (CSV)
+├── views/                      # VISTAS: Pantallas con HTML y datos
+│   ├── layouts/                # Encabezado (header.php) y pie de pagina (footer.php)
+│   ├── auth/                   # Formularios de acceso
+│   ├── dashboard/              # Panel del docente con tabla en vivo
+│   ├── estudiantes/            # Listado, nuevo alumno y portal del estudiante
+│   ├── asistencia/             # Confirmacion de escaneo del QR
+│   ├── reportes/               # Tabla con filtros y boton de descarga
+│   └── errors/                 # Pagina 404
+├── public/                     # Carpeta publica accesible desde el navegador
+│   ├── index.php               # Front Controller (enrutador con switch/case)
+│   ├── .htaccess               # Enrutamiento de URLs amigables
+│   └── assets/                 # Hojas de estilo CSS y scripts JS
+├── database/                   # Script de creacion y datos de prueba
+│   └── database.sql
+├── docs/                       # Documentacion tecnica y manuales
+├── docker-compose.yml          # Despliegue automatico con Docker
+└── Dockerfile                  # Configuracion de servidor PHP Apache
+```
 
-## Cómo funciona
+---
 
-1. El docente inicia sesión y genera el QR de una clase (esto crea una "sesión" activa).
-2. Los estudiantes escanean el QR con su celular (o entran manualmente a `escanear.php`)
-   e ingresan su código de estudiante para registrar su asistencia.
-3. En el panel del docente la tabla de asistencias se actualiza sola cada 5 segundos
-   (tiempo real) y se puede filtrar por fecha, estudiante o materia.
-4. En "Estudiantes" se pueden agregar o eliminar estudiantes y sus códigos.
-5. En "Reportes" se pueden filtrar asistencias por rango de fechas y exportarlas a CSV.
+## Como Funciona el Patron MVC en este Proyecto
 
-## Notas
+1. **El Usuario hace una peticion:** Escribe una direccion en el navegador (ejemplo: `/estudiantes`).
+2. **El Enrutador (`public/index.php`):** Detecta la ruta y llama al controlador correspondiente (`EstudianteController`).
+3. **El Controlador (`controllers/`):** 
+   * Recibe la peticion y los datos de formularios (`$_POST`).
+   * Le pide la informacion al **Modelo** (`Estudiante::listar()`).
+   * Envia los resultados a la **Vista** (`$this->vista('estudiantes.index', $datos)`).
+4. **El Modelo (`models/`):** Ejecuta la consulta SQL con sentencias preparadas en la base de datos MariaDB/MySQL.
+5. **La Vista (`views/`):** Imprime el HTML con los datos recibidos y se muestra en pantalla.
 
-- El código QR se genera usando una imagen de la API pública api.qrserver.com,
-  por lo que se necesita conexión a internet al momento de mostrarlo (no para
-  registrar asistencias, eso sí funciona en red local).
-- El "tiempo real" se hace con un refresco automático (polling) cada 5 segundos
-  vía JavaScript/fetch, no con WebSockets, para mantenerlo simple.
-- Puedes agregar más docentes insertando filas en la tabla `docentes` con
-  `password_hash()` de PHP para generar la contraseña.
+---
+
+## Despliegue y Ejecucion
+
+### Opcion 1: Con Docker
+```bash
+docker compose up -d --build
+```
+* **Aplicacion:** http://localhost:8080/
+* **phpMyAdmin:** http://localhost:8081/
+
+### Opcion 2: Con XAMPP
+1. Copia la carpeta `asistencia` dentro de `C:\xampp\htdocs\`.
+2. Importa el archivo `database/database.sql` en phpMyAdmin (`asistencia_qr`).
+3. Accede desde tu navegador a:
+   ```text
+   http://localhost/asistencia/
+   ```
+
+---
+
+## Credenciales de Acceso
+
+| Rol | Usuario / Codigo | Contrasena |
+|---|---|---|
+| Docente Titular | `profesor` | `12345` |
+| Docente Demo | `Demo` | `Demo123` |
+| Estudiantes | `EST001` a `EST008` | (Solo requiere el codigo) |
+
+---
+
+## Documentacion Detallada
+
+En la carpeta [`docs/`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/) encontraras guias para exponer y defender el proyecto:
+* [docs/arquitectura.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/arquitectura.md): Explicacion del patron MVC pedagogico.
+* [docs/base_de_datos.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/base_de_datos.md): Tablas y relaciones.
+* [docs/api_y_rutas.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/api_y_rutas.md): Rutas y API JSON.
+* [docs/manual_usuario.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/manual_usuario.md): Manual paso a paso.
+* [docs/guia_pruebas.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/guia_pruebas.md): Guia de pruebas paso a paso desde PC y movil por Wi-Fi.
+* [docs/despliegue_y_mantenimiento.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/despliegue_y_mantenimiento.md): Variables de entorno, Docker y respaldos.
