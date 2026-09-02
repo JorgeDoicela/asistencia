@@ -55,6 +55,8 @@ class DashboardController extends BaseController
         $error   = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_mensaje'], $_SESSION['flash_error']);
 
+        $esLocalhost = in_array(strtolower(explode(':', $host)[0]), ['localhost', '127.0.0.1', '::1']);
+
         // 3. Cargar la vista con todos los datos
         $this->vista('dashboard.index', [
             'base'              => $base,
@@ -63,6 +65,7 @@ class DashboardController extends BaseController
             'asistenciasSesion' => $asistenciasSesion,
             'qrUrl'             => $qrUrl,
             'urlRegistro'       => $urlRegistro,
+            'esLocalhost'       => $esLocalhost,
             'historial'         => $historial,
             'totalEstudiantes'  => $totalEstudiantes,
             'asistenciasHoy'    => $asistenciasHoy,
@@ -81,8 +84,38 @@ class DashboardController extends BaseController
         $nivel   = trim($_POST['nivel'] ?? '');
         $materia = trim($_POST['materia'] ?? '');
 
+        $carrerasValidas = [
+            'Desarrollo de Software',
+            'Mecanica Automotriz',
+            'Entrenamiento Deportivo',
+            'Educacion Inicial'
+        ];
+
+        $nivelesValidos = [
+            'Primer Nivel',
+            'Segundo Nivel',
+            'Tercer Nivel',
+            'Cuarto Nivel',
+            'Quinto Nivel'
+        ];
+
         if (empty($carrera) || empty($nivel) || empty($materia)) {
-            $_SESSION['flash_error'] = 'Debe completar todos los campos.';
+            $_SESSION['flash_error'] = 'Debe completar todos los campos requeridos para iniciar la clase.';
+            $this->redireccionar('/dashboard');
+        }
+
+        if (!in_array($carrera, $carrerasValidas, true)) {
+            $_SESSION['flash_error'] = 'Por favor seleccione una carrera institucional válida.';
+            $this->redireccionar('/dashboard');
+        }
+
+        if (!in_array($nivel, $nivelesValidos, true)) {
+            $_SESSION['flash_error'] = 'Por favor seleccione un nivel o semestre válido.';
+            $this->redireccionar('/dashboard');
+        }
+
+        if (mb_strlen($materia) < 3) {
+            $_SESSION['flash_error'] = 'El nombre de la materia debe tener al menos 3 caracteres.';
             $this->redireccionar('/dashboard');
         }
 

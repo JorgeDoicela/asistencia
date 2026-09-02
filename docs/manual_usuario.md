@@ -34,24 +34,30 @@ Guía paso a paso para el uso de la plataforma tanto para el personal docente co
 3. Para **editar o eliminar**: Usa los botones correspondientes en la fila del estudiante.
 4. Para **buscar**: Usa el buscador superior para filtrar por código, apellido o carrera.
 
-### 1.5. Reportes y Descarga en Excel (CSV)
+### 1.5. Reportes y Descarga Multiformato (CSV, Excel y PDF)
 1. Haz clic en **"Reportes"** en la barra superior.
-2. Aplica los filtros deseados (rango de fechas desde/hasta, materia o estudiante).
-3. Haz clic en **"Descargar CSV (Excel)"** para obtener el archivo con formato UTF-8 listo para abrir en Microsoft Excel.
+2. Aplica los filtros deseados (periodo rápido: Hoy, Mes, 30 días, o rango de fechas, materia o estudiante).
+3. Utiliza el formato de exportación de tu preferencia:
+   * **Descargar CSV:** Archivo estándar delimitado por comas con codificación UTF-8 BOM.
+   * **Descargar Excel:** Archivo estructurado para Microsoft Excel con membrete y celdas tipadas.
+   * **Descargar PDF:** Informe formal en orientación apaisada con membrete oficial del ISTPET y paginación.
 
 ---
 
 ## 2. Guía para Estudiantes
 
-### 2.1. Registro de Asistencia mediante Código QR
-1. Abre la cámara de tu teléfono móvil o lector de códigos QR y apunta al QR proyectado por el docente.
-2. Se abrirá la página web de confirmación con el código de sesión prellenado.
+### 2.1. Registro de Asistencia con la Cámara Integrada
+1. Ingresa a la opción **"Registrar Asistencia en Clase"** (`/asistencia/escanear`).
+2. Presiona el botón **"Escanear Código QR con la Cámara"**:
+   * Se activará el visor de escaneo o la cámara nativa del teléfono.
+   * Apunta hacia el código QR de la clase proyectado por el docente.
+   * Al reconocer el código, escucharás un **tono armónico (beep)** y el código de sesión se completará automáticamente.
 3. Ingresa tu **Código de Estudiante** (ej. `EST001`).
-4. Haz clic en **"Confirmar Asistencia"**.
-5. Verás una pantalla de confirmación verde con tus nombres completos, carrera, materia y hora exacta de registro.
+4. Haz clic en **"Confirmar Mi Asistencia"**.
+5. Escucharás el tono acústico de confirmación y verás la pantalla con tus nombres completos, materia y hora exacta de registro.
 
 > [!NOTE]
-> Si intentas registrarte dos veces en la misma sesión, el sistema te notificará amigablemente que tu asistencia ya fue registrada previamente y no duplicará la fila.
+> Si intentas registrarte dos veces en la misma sesión, el sistema te notificará amigablemente mediante un tono de advertencia que tu asistencia ya fue registrada previamente y no duplicará la fila.
 
 ### 2.2. Registro Manual (Si tu cámara no funciona)
 1. Entra a la página principal del sistema y presiona **"Registrar Asistencia"** (`/asistencia/escanear`).

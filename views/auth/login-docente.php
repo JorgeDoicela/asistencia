@@ -37,13 +37,13 @@ require dirname(__DIR__) . '/layouts/header.php';
 
         <form action="<?= $base ?>/login" method="POST">
             <div class="form-group">
-                <label for="usuario" class="form-label">Usuario del Docente</label>
-                <input type="text" id="usuario" name="usuario" class="form-control" required autofocus placeholder="Ej: profesor o Demo">
+                <label for="usuario" class="form-label">Usuario del Docente <span class="text-danger">*</span></label>
+                <input type="text" id="usuario" name="usuario" class="form-control" required autofocus minlength="3" maxlength="30" placeholder="Ej: profesor o Demo" autocomplete="username">
             </div>
 
             <div class="form-group mb-6">
-                <label for="password" class="form-label">Contrasena</label>
-                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
+                <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                <input type="password" id="password" name="password" class="form-control" required minlength="4" maxlength="50" placeholder="••••••••" autocomplete="current-password">
             </div>
 
             <button type="submit" class="btn btn-primary btn-block btn-lg">

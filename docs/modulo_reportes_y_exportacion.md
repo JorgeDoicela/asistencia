@@ -77,8 +77,8 @@ Durante la fase de auditoría se identificaron y solucionaron dos problemas crí
 
 ### 3.3. Exportación PDF Institucional (`/reportes/pdf`)
 * **Controlador:** `ReporteController::exportarPdf()`
-* **Motor Generador:** [FPDF 1.86](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/libs/fpdf/) embebido en la carpeta `libs/fpdf/`.
-* **Clase Especializada:** [libs/ReportePdf.php](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/libs/ReportePdf.php) (extiende `FPDF`).
+* **Motor Generador:** [FPDF 1.86](../libs/fpdf/) embebido en la carpeta `libs/fpdf/`.
+* **Clase Especializada:** [libs/ReportePdf.php](../libs/ReportePdf.php) (extiende `FPDF`).
 * **Tipo MIME:** `application/pdf`
 * **Nombre de Archivo:** `asistencias_YYYYMMDD_HHMMSS.pdf`
 * **Características Técnicas:**

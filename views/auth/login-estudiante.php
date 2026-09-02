@@ -37,8 +37,19 @@ require dirname(__DIR__) . '/layouts/header.php';
 
         <form action="<?= $base ?>/login-estudiante" method="POST">
             <div class="form-group mb-6">
-                <label for="codigo" class="form-label">Tu Codigo de Estudiante</label>
-                <input type="text" id="codigo" name="codigo" class="form-control form-control-code" required autofocus placeholder="Ej: EST001">
+                <label for="codigo" class="form-label">Tu Código de Estudiante <span class="text-danger">*</span></label>
+                <input type="text" id="codigo" name="codigo" 
+                       class="form-control form-control-code" 
+                       required autofocus 
+                       minlength="3" maxlength="15"
+                       pattern="^[A-Za-z0-9_-]{3,15}$"
+                       title="Código institucional de 3 a 15 caracteres (ej: EST001)"
+                       placeholder="Ej: EST001"
+                       style="text-transform: uppercase;"
+                       oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '')">
+                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 0.8rem;">
+                    Ingresa el código alfanumérico que te asignó el ISTPET.
+                </small>
             </div>
 
             <button type="submit" class="btn btn-dorado btn-block btn-lg">

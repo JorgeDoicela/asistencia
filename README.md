@@ -62,49 +62,53 @@ asistencia/
 
 ---
 
-## Despliegue y Ejecucion
+## Despliegue y Ejecución Dinámica
 
-### Opcion 1: Con Docker
+El sistema detecta automáticamente su entorno de ejecución (Docker, XAMPP, Nginx o IP de red local) y ajusta sus rutas y enlaces de forma 100% dinámica mediante `$base`.
+
+### Opción 1: Con Docker (Contenerizado)
 ```bash
 docker compose up -d --build
 ```
-* **Aplicacion:** http://localhost:8080/
-* **phpMyAdmin:** http://localhost:8081/
+* **Aplicación Web:** `http://<HOST>:8080/` (ej. `http://localhost:8080/` o `http://<IP_LOCAL>:8080/`)
+* **phpMyAdmin:** `http://<HOST>:8081/` (ej. `http://localhost:8081/`)
 
 ### Ejecutar Pruebas Automatizadas (Tests)
-Para ejecutar la suite de pruebas unitarias y de integracion:
+Para ejecutar la suite de pruebas unitarias y de integración:
 ```bash
 docker compose exec web php tests/test_runner.php
 ```
 
-### Opcion 2: Con XAMPP
-1. Copia la carpeta `asistencia` dentro de `C:\xampp\htdocs\`.
-2. Importa el archivo `database/database.sql` en phpMyAdmin (`asistencia_qr`).
-3. Accede desde tu navegador a:
+### Opción 2: Con XAMPP / Apache Tradicional
+1. Clona o copia la carpeta `asistencia` dentro del directorio web (`htdocs/` en Windows/Linux).
+2. Importa el archivo `database/database.sql` en tu gestor de base de datos (`asistencia_qr`).
+3. Accede desde tu navegador web a:
    ```text
-   http://localhost/asistencia/
+   http://<HOST>/asistencia/
    ```
+   *(ejemplo: `http://localhost/asistencia/` o `http://<IP_LOCAL>/asistencia/`)*.
 
 ---
 
 ## Credenciales de Acceso
 
-| Rol | Usuario / Codigo | Contrasena |
+| Rol | Usuario / Código | Contraseña |
 |---|---|---|
 | Docente Titular | `profesor` | `12345` |
 | Docente Demo | `Demo` | `Demo123` |
-| Estudiantes | `EST001` a `EST008` | (Solo requiere el codigo) |
+| Estudiantes | `EST001` a `EST008` | (Solo requiere el código institucional) |
 
 ---
 
-## Documentacion Detallada
+## Documentación Técnica Detallada
 
-En la carpeta [`docs/`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/) encontraras guias para exponer y defender el proyecto:
-* [docs/arquitectura.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/arquitectura.md): Explicacion del patron MVC pedagogico.
-* [docs/diseno_ux_ui_y_flujos.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/diseno_ux_ui_y_flujos.md): Diseño UX/UI, modo proyector para aulas, flujos de navegación contextual y adaptabilidad móvil.
-* [docs/modulo_reportes_y_exportacion.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/modulo_reportes_y_exportacion.md): Especificación del módulo de reportes y exportaciones en CSV, Excel y PDF.
-* [docs/base_de_datos.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/base_de_datos.md): Tablas y relaciones.
-* [docs/api_y_rutas.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/api_y_rutas.md): Rutas y API JSON.
-* [docs/manual_usuario.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/manual_usuario.md): Manual paso a paso.
-* [docs/guia_pruebas.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/guia_pruebas.md): Guia de pruebas paso a paso desde PC y movil por Wi-Fi.
-* [docs/despliegue_y_mantenimiento.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/despliegue_y_mantenimiento.md): Variables de entorno, Docker y respaldos.
+En la carpeta [`docs/`](docs/) encontrarás las especificaciones completas:
+* [docs/auditoria_codigo_linea_a_linea.md](docs/auditoria_codigo_linea_a_linea.md): Auditoría exhaustiva línea a línea de todo el código fuente del sistema.
+* [docs/arquitectura.md](docs/arquitectura.md): Explicación del patrón MVC pedagógico y flujo de peticiones.
+* [docs/diseno_ux_ui_y_flujos.md](docs/diseno_ux_ui_y_flujos.md): Diseño UX/UI, escáner de cámara HUD, feedback de audio y adaptabilidad móvil.
+* [docs/modulo_reportes_y_exportacion.md](docs/modulo_reportes_y_exportacion.md): Especificación del módulo de reportes y exportaciones en CSV, Excel y PDF.
+* [docs/base_de_datos.md](docs/base_de_datos.md): Esquema relacional, tablas, índices y reglas de integridad.
+* [docs/api_y_rutas.md](docs/api_y_rutas.md): Catálogo de endpoints HTTP y API JSON de tiempo real.
+* [docs/manual_usuario.md](docs/manual_usuario.md): Manual de uso para docentes y estudiantes.
+* [docs/guia_pruebas.md](docs/guia_pruebas.md): Guía de pruebas paso a paso desde PC y móvil por Wi-Fi.
+* [docs/despliegue_y_mantenimiento.md](docs/despliegue_y_mantenimiento.md): Variables de entorno, Docker y respaldos.

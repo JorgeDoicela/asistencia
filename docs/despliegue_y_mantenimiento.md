@@ -31,21 +31,22 @@ El proyecto incluye configuración de Docker Compose con 3 servicios:
    docker compose ps
    ```
 3. Accesos:
-   * **Sistema Web:** `http://localhost:8080/`
-   * **phpMyAdmin:** `http://localhost:8081/`
+   * **Sistema Web:** `http://<HOST>:8080/` (ej. `http://localhost:8080/` o `http://<IP_LOCAL>:8080/`)
+   * **phpMyAdmin:** `http://<HOST>:8081/` (ej. `http://localhost:8081/`)
 
 ---
 
-## 3. Despliegue en Servidores Locales (XAMPP / WampServer)
+## 3. Despliegue en Servidores Locales (XAMPP / WampServer / LAMP)
 
-1. Copia la carpeta del proyecto dentro de la ruta pública del servidor:
-   * **XAMPP Windows:** `C:\xampp\htdocs\asistencia`
-2. Inicia los servicios de **Apache** y **MySQL** en el Panel de XAMPP.
-3. Ingresa a phpMyAdmin (`http://localhost/phpmyadmin`) e importa el archivo `database/database.sql`.
+1. Copia la carpeta del proyecto dentro del directorio web raíz:
+   * **XAMPP / LAMP:** `<directorio_web>/htdocs/asistencia`
+2. Inicia los servicios de **Apache** y **MySQL** en tu gestor de servicios.
+3. Ingresa a phpMyAdmin (`http://<HOST>/phpmyadmin`) e importa el archivo `database/database.sql`.
 4. Accede desde tu navegador web a:
    ```text
-   http://localhost/asistencia/
+   http://<HOST>/asistencia/
    ```
+   *(ejemplo: `http://localhost/asistencia/` o `http://<IP_LOCAL>/asistencia/`)*.
 5. La aplicación redirigirá automáticamente el tráfico de la raíz a `public/` gracias al archivo `.htaccess`.
 
 ---

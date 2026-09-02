@@ -76,4 +76,50 @@ require dirname(__DIR__) . '/layouts/header.php';
     </div>
 </div>
 
+<script>
+(function() {
+    function emitirFeedbackAudio(tipo) {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+
+            if (tipo === 'exito') {
+                // Doble tono ascendente tipo escáner de acceso confirmado (880 Hz a 1760 Hz)
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.22);
+            } else {
+                // Tono grave de advertencia / no registrado (320 Hz a 240 Hz)
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, ctx.currentTime);
+                osc.frequency.setValueAtTime(240, ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.28, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            }
+        } catch (err) {
+            // Silencioso si las políticas del navegador restringen audio previo
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        emitirFeedbackAudio('<?= $exito ? "exito" : "error" ?>');
+    });
+})();
+</script>
+
 <?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

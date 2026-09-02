@@ -79,4 +79,25 @@ class Estudiante
         $fila = $stmt->fetch();
         return (int) ($fila['total'] ?? 0);
     }
+
+    // Calcula y sugiere el siguiente código correlativo disponible (ej. EST009)
+    public static function sugerirSiguienteCodigo(): string
+    {
+        $db = Database::conectar();
+        $stmt = $db->query("SELECT codigo FROM estudiantes WHERE codigo LIKE 'EST%'");
+        $codigos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $maxNum = 0;
+        foreach ($codigos as $c) {
+            if (preg_match('/^EST(\d+)$/i', $c, $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $maxNum) {
+                    $maxNum = $num;
+                }
+            }
+        }
+
+        $siguiente = $maxNum + 1;
+        return 'EST' . str_pad((string)$siguiente, 3, '0', STR_PAD_LEFT);
+    }
 }

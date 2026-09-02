@@ -60,7 +60,7 @@ $queryExport = http_build_query([
         </div>
     </div>
 
-    <form method="GET" action="<?= $base ?>/reportes" class="filter-form-grid" id="formFiltrosReporte">
+    <form method="GET" action="<?= $base ?>/reportes" class="filter-form-grid" id="formFiltrosReporte" onsubmit="return validarFiltrosReporte(event)">
         <div class="form-group mb-0">
             <label for="fecha_inicio" class="form-label">Fecha Desde</label>
             <input type="date" id="fecha_inicio" name="fecha_inicio" 
@@ -126,6 +126,17 @@ $queryExport = http_build_query([
 </div>
 
 <script>
+function validarFiltrosReporte(e) {
+    const inicio = document.getElementById('fecha_inicio')?.value;
+    const fin = document.getElementById('fecha_fin')?.value;
+    if (inicio && fin && inicio > fin) {
+        alert('La fecha de inicio no puede ser posterior a la fecha final.');
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
 function establecerPeriodo(tipo) {
     const inicio = document.getElementById('fecha_inicio');
     const fin = document.getElementById('fecha_fin');

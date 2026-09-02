@@ -31,13 +31,16 @@ class EstudianteController extends BaseController
         $error   = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_mensaje'], $_SESSION['flash_error']);
 
+        $siguienteCodigo = Estudiante::sugerirSiguienteCodigo();
+
         $this->vista('estudiantes.index', [
-            'base'        => self::obtenerRutaBase(),
-            'estudiantes' => $estudiantes,
-            'busqueda'    => $busqueda,
-            'total'       => $total,
-            'mensaje'     => $mensaje,
-            'error'       => $error
+            'base'            => self::obtenerRutaBase(),
+            'estudiantes'     => $estudiantes,
+            'busqueda'        => $busqueda,
+            'total'           => $total,
+            'siguienteCodigo' => $siguienteCodigo,
+            'mensaje'         => $mensaje,
+            'error'           => $error
         ]);
     }
 
@@ -51,8 +54,30 @@ class EstudianteController extends BaseController
         $apellido = trim($_POST['apellido'] ?? '');
         $carrera  = trim($_POST['carrera'] ?? '');
 
+        $carrerasValidas = [
+            'Desarrollo de Software',
+            'Mecanica Automotriz',
+            'Entrenamiento Deportivo',
+            'Educacion Inicial'
+        ];
+
         if (empty($codigo) || empty($nombre) || empty($apellido) || empty($carrera)) {
             $_SESSION['flash_error'] = 'Todos los campos son obligatorios.';
+            $this->redireccionar('/estudiantes');
+        }
+
+        if (strlen($codigo) < 3 || strlen($codigo) > 15 || !preg_match('/^[A-Za-z0-9_-]+$/', $codigo)) {
+            $_SESSION['flash_error'] = 'El código debe tener entre 3 y 15 caracteres alfanuméricos (letras, números o guiones).';
+            $this->redireccionar('/estudiantes');
+        }
+
+        if (mb_strlen($nombre) < 2 || mb_strlen($apellido) < 2) {
+            $_SESSION['flash_error'] = 'El nombre y apellido deben tener al menos 2 caracteres.';
+            $this->redireccionar('/estudiantes');
+        }
+
+        if (!in_array($carrera, $carrerasValidas, true)) {
+            $_SESSION['flash_error'] = 'Debe seleccionar una carrera institucional válida.';
             $this->redireccionar('/estudiantes');
         }
 
@@ -82,8 +107,30 @@ class EstudianteController extends BaseController
         $apellido = trim($_POST['apellido'] ?? '');
         $carrera  = trim($_POST['carrera'] ?? '');
 
+        $carrerasValidas = [
+            'Desarrollo de Software',
+            'Mecanica Automotriz',
+            'Entrenamiento Deportivo',
+            'Educacion Inicial'
+        ];
+
         if (!$id || empty($codigo) || empty($nombre) || empty($apellido) || empty($carrera)) {
-            $_SESSION['flash_error'] = 'Datos no validos para actualizar.';
+            $_SESSION['flash_error'] = 'Todos los campos son obligatorios para actualizar.';
+            $this->redireccionar('/estudiantes');
+        }
+
+        if (strlen($codigo) < 3 || strlen($codigo) > 15 || !preg_match('/^[A-Za-z0-9_-]+$/', $codigo)) {
+            $_SESSION['flash_error'] = 'El código debe tener entre 3 y 15 caracteres alfanuméricos.';
+            $this->redireccionar('/estudiantes');
+        }
+
+        if (mb_strlen($nombre) < 2 || mb_strlen($apellido) < 2) {
+            $_SESSION['flash_error'] = 'El nombre y apellido deben tener al menos 2 caracteres.';
+            $this->redireccionar('/estudiantes');
+        }
+
+        if (!in_array($carrera, $carrerasValidas, true)) {
+            $_SESSION['flash_error'] = 'Debe seleccionar una carrera institucional válida.';
             $this->redireccionar('/estudiantes');
         }
 

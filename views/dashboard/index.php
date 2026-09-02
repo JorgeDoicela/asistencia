@@ -66,7 +66,7 @@ require dirname(__DIR__) . '/layouts/header.php';
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                     Modo Proyector
                 </button>
-                <button type="button" onclick="copiarEnlaceDirecto('<?= $qrUrl ?>')" class="btn btn-outline flex-1 btn-sm" title="Copiar enlace para compartir">
+                <button type="button" onclick="copiarEnlaceDirecto('<?= $urlRegistro ?>')" class="btn btn-outline flex-1 btn-sm" title="Copiar enlace para compartir">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                     Copiar Enlace
                 </button>
@@ -83,6 +83,13 @@ require dirname(__DIR__) . '/layouts/header.php';
                     Finalizar Sesion de Clase
                 </button>
             </form>
+
+            <?php if (!empty($esLocalhost)): ?>
+                <div class="alert alert-info mt-4 mb-0" style="font-size: 0.78rem; padding: 8px 12px; text-align: left; line-height: 1.4; border-radius: var(--radius-sm);">
+                    <strong>Nota para escanear con celulares:</strong><br>
+                    Estás en <code>localhost</code>. Para que los teléfonos se conecten por Wi-Fi, abre este panel en tu PC usando tu IP local (ej. <code>http://192.168.X.X/asistencia/dashboard</code>).
+                </div>
+            <?php endif; ?>
         </div>
 
         <!-- Tabla en vivo de asistencias -->
@@ -93,6 +100,9 @@ require dirname(__DIR__) . '/layouts/header.php';
                     <p class="text-muted" style="font-size: 0.85rem;">Se actualiza automaticamente cada 5 segundos</p>
                 </div>
                 <div class="d-flex align-center gap-2">
+                    <button type="button" id="btnSonidoDocente" onclick="toggleSonidoDocente()" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 0.74rem;" title="Activar o silenciar aviso sonoro en aula">
+                        Sonido: Activado
+                    </button>
                     <span id="liveIndicator" class="live-indicator"></span>
                     <span id="contadorAsistencias" class="font-extrabold text-primary" style="font-size: 1.2rem;"><?= count($asistenciasSesion) ?></span>
                     <span class="text-muted" style="font-size: 0.85rem;">presentes</span>
@@ -132,13 +142,49 @@ require dirname(__DIR__) . '/layouts/header.php';
         </div>
     </div>
 
-    <!-- Script de polling en tiempo real -->
+    <!-- Script de polling en tiempo real con audio feedback -->
     <script>
+    let sonidoDocenteHabilitado = true;
+
+    function toggleSonidoDocente() {
+        sonidoDocenteHabilitado = !sonidoDocenteHabilitado;
+        const btn = document.getElementById('btnSonidoDocente');
+        if (btn) {
+            btn.textContent = sonidoDocenteHabilitado ? 'Sonido: Activado' : 'Sonido: Silenciado';
+            btn.style.color = sonidoDocenteHabilitado ? 'var(--color-primary)' : 'var(--color-text-muted)';
+        }
+        if (sonidoDocenteHabilitado) {
+            reproducirBeepDocente();
+        }
+    }
+
+    function reproducirBeepDocente() {
+        if (!sonidoDocenteHabilitado) return;
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            // Tono armónico institucional limpio (784 Hz a 1046.5 Hz)
+            osc.frequency.setValueAtTime(784, ctx.currentTime);
+            osc.frequency.setValueAtTime(1046.5, ctx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.22);
+        } catch (e) {}
+    }
+
     (function() {
         const urlApi = '<?= $base ?>/api/asistencias/activas';
         const tbody = document.getElementById('tablaAsistenciasCuerpo');
         const contador = document.getElementById('contadorAsistencias');
         const liveIndicator = document.getElementById('liveIndicator');
+        let conteoPrevio = <?= count($asistenciasSesion) ?>;
 
         async function actualizarAsistencias() {
             try {
@@ -149,6 +195,12 @@ require dirname(__DIR__) . '/layouts/header.php';
 
                 if (data.success && data.activa) {
                     contador.textContent = data.asistencias.length;
+
+                    // Si ingresó un nuevo estudiante en vivo, emitir sonido
+                    if (data.asistencias.length > conteoPrevio) {
+                        reproducirBeepDocente();
+                    }
+                    conteoPrevio = data.asistencias.length;
 
                     if (data.asistencias.length === 0) {
                         tbody.innerHTML = `
@@ -189,11 +241,11 @@ require dirname(__DIR__) . '/layouts/header.php';
             Configura la materia y nivel para generar el codigo QR que mostraras a los estudiantes.
         </p>
 
-        <form action="<?= $base ?>/dashboard/sesion/crear" method="POST">
+        <form action="<?= $base ?>/dashboard/sesion/crear" method="POST" onsubmit="return validarCrearSesion(event)">
             <div class="form-group">
-                <label for="carrera" class="form-label">Carrera</label>
+                <label for="carrera" class="form-label">Carrera <span class="text-danger">*</span></label>
                 <select id="carrera" name="carrera" class="form-select" required>
-                    <option value="">-- Seleccionar Carrera --</option>
+                    <option value="" disabled selected>-- Seleccionar Carrera --</option>
                     <option value="Desarrollo de Software">Desarrollo de Software</option>
                     <option value="Mecanica Automotriz">Mecanica Automotriz</option>
                     <option value="Entrenamiento Deportivo">Entrenamiento Deportivo</option>
@@ -202,9 +254,9 @@ require dirname(__DIR__) . '/layouts/header.php';
             </div>
 
             <div class="form-group">
-                <label for="nivel" class="form-label">Nivel / Semestre</label>
+                <label for="nivel" class="form-label">Nivel / Semestre <span class="text-danger">*</span></label>
                 <select id="nivel" name="nivel" class="form-select" required>
-                    <option value="">-- Seleccionar Nivel --</option>
+                    <option value="" disabled selected>-- Seleccionar Nivel --</option>
                     <option value="Primer Nivel">Primer Nivel</option>
                     <option value="Segundo Nivel">Segundo Nivel</option>
                     <option value="Tercer Nivel">Tercer Nivel</option>
@@ -214,8 +266,8 @@ require dirname(__DIR__) . '/layouts/header.php';
             </div>
 
             <div class="form-group mb-6">
-                <label for="materia" class="form-label">Nombre de la Materia</label>
-                <input type="text" id="materia" name="materia" class="form-control" required placeholder="Ej: Programacion Web II, Redes, etc.">
+                <label for="materia" class="form-label">Nombre de la Materia <span class="text-danger">*</span></label>
+                <input type="text" id="materia" name="materia" class="form-control" required minlength="3" maxlength="80" placeholder="Ej: Programacion Web II, Redes, etc.">
                 
                 <div class="mt-2">
                     <span class="text-muted" style="font-size: 0.8rem; font-weight: 600;">Sugerencias de materias para esta carrera:</span>
@@ -318,6 +370,31 @@ require dirname(__DIR__) . '/layouts/header.php';
 
 <script>
 // Funcionalidades Interactivas del Dashboard
+function validarCrearSesion(e) {
+    const car = document.getElementById('carrera')?.value.trim();
+    const niv = document.getElementById('nivel')?.value.trim();
+    const mat = document.getElementById('materia')?.value.trim();
+    if (!car) {
+        alert('Por favor selecciona una carrera técnica.');
+        document.getElementById('carrera')?.focus();
+        e.preventDefault();
+        return false;
+    }
+    if (!niv) {
+        alert('Por favor selecciona un nivel o semestre.');
+        document.getElementById('nivel')?.focus();
+        e.preventDefault();
+        return false;
+    }
+    if (!mat || mat.length < 3) {
+        alert('Por favor ingresa el nombre de la materia (mínimo 3 caracteres).');
+        document.getElementById('materia')?.focus();
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
 function abrirProyector() {
     const modal = document.getElementById('modalProyector');
     if (modal) modal.style.display = 'flex';

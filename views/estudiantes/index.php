@@ -111,41 +111,66 @@ require dirname(__DIR__) . '/layouts/header.php';
 <!-- MODAL CREAR / EDITAR ESTUDIANTE -->
 <div id="modalEstudiante" class="modal-overlay">
     <div class="modal-content">
-        <div class="d-flex justify-content-between align-center mb-4" style="border-bottom: 1px solid var(--color-border); padding-bottom: 12px;">
-            <h3 id="modalTitulo" class="modal-title mb-0" style="font-size: 1.25rem;">Nuevo Estudiante</h3>
-            <button type="button" onclick="cerrarModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1;" title="Cerrar modal">&times;</button>
+        <div class="modal-header-row">
+            <h3 id="modalTitulo" class="modal-title mb-0" style="font-size: 1.25rem;">Registrar Nuevo Estudiante</h3>
+            <button type="button" onclick="cerrarModal()" class="modal-close-btn" title="Cerrar ventana">&times;</button>
         </div>
         
-        <form id="formEstudiante" method="POST" action="<?= $base ?>/estudiantes/crear">
+        <form id="formEstudiante" method="POST" action="<?= $base ?>/estudiantes/crear" onsubmit="return validarEstudiante(event)">
             <input type="hidden" id="estudiante_id" name="id" value="">
 
             <div class="form-group">
-                <label for="modal_codigo" class="form-label">Codigo Unico</label>
-                <input type="text" id="modal_codigo" name="codigo" required placeholder="Ej: EST009"
-                       class="form-control form-control-code">
+                <div class="d-flex justify-between align-center mb-1">
+                    <label for="modal_codigo" class="form-label mb-0">Código Único Institucional <span class="text-danger">*</span></label>
+                    <button type="button" onclick="generarCodigoSugerido()" class="chip-btn" style="font-size: 0.74rem; padding: 2px 8px;" title="Regenerar código correlativo">
+                        Autogenerar
+                    </button>
+                </div>
+                <input type="text" id="modal_codigo" name="codigo" required 
+                       minlength="3" maxlength="15"
+                       pattern="^[A-Za-z0-9_-]{3,15}$"
+                       title="Entre 3 y 15 caracteres alfanuméricos (ej: EST009)"
+                       placeholder="Ej: EST009"
+                       class="form-control form-control-code"
+                       style="text-transform: uppercase;"
+                       oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '')">
+                <small class="text-muted" style="display: block; margin-top: 3px; font-size: 0.78rem;">
+                    Se sugiere automáticamente el siguiente correlativo. Puedes editarlo libremente.
+                </small>
             </div>
 
             <div class="form-group">
-                <label for="modal_nombre" class="form-label">Nombres</label>
-                <input type="text" id="modal_nombre" name="nombre" required placeholder="Nombres del estudiante"
+                <label for="modal_nombre" class="form-label">Nombres <span class="text-danger">*</span></label>
+                <input type="text" id="modal_nombre" name="nombre" required 
+                       minlength="2" maxlength="50"
+                       pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                       title="Solo letras y espacios (mínimo 2 caracteres)"
+                       placeholder="Ej: Juan Carlos"
                        class="form-control">
             </div>
 
             <div class="form-group">
-                <label for="modal_apellido" class="form-label">Apellidos</label>
-                <input type="text" id="modal_apellido" name="apellido" required placeholder="Apellidos del estudiante"
+                <label for="modal_apellido" class="form-label">Apellidos <span class="text-danger">*</span></label>
+                <input type="text" id="modal_apellido" name="apellido" required 
+                       minlength="2" maxlength="50"
+                       pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                       title="Solo letras y espacios (mínimo 2 caracteres)"
+                       placeholder="Ej: Pérez Rodríguez"
                        class="form-control">
             </div>
 
             <div class="form-group mb-6">
-                <label for="modal_carrera" class="form-label">Carrera</label>
+                <label for="modal_carrera" class="form-label">Carrera Técnica <span class="text-danger">*</span></label>
                 <select id="modal_carrera" name="carrera" class="form-select" required>
-                    <option value="">-- Seleccione Carrera --</option>
+                    <option value="" disabled selected>-- Seleccione Carrera --</option>
                     <option value="Desarrollo de Software">Desarrollo de Software</option>
                     <option value="Mecanica Automotriz">Mecanica Automotriz</option>
                     <option value="Entrenamiento Deportivo">Entrenamiento Deportivo</option>
                     <option value="Educacion Inicial">Educacion Inicial</option>
                 </select>
+                <small class="text-muted" style="display: block; margin-top: 3px; font-size: 0.78rem;">
+                    Selecciona una carrera válida de la lista institucional.
+                </small>
             </div>
 
             <div class="modal-actions">
@@ -166,16 +191,55 @@ const nombreInput = document.getElementById('modal_nombre');
 const apellidoInput = document.getElementById('modal_apellido');
 const carreraInput = document.getElementById('modal_carrera');
 
+function validarEstudiante(e) {
+    const cod = codigoInput.value.trim();
+    const nom = nombreInput.value.trim();
+    const ape = apellidoInput.value.trim();
+    const car = carreraInput.value.trim();
+
+    if (!cod || cod.length < 3) {
+        alert('Por favor ingresa un código de estudiante válido (mínimo 3 caracteres).');
+        codigoInput.focus();
+        e.preventDefault();
+        return false;
+    }
+    if (!nom || nom.length < 2) {
+        alert('Por favor ingresa los nombres del estudiante (mínimo 2 caracteres).');
+        nombreInput.focus();
+        e.preventDefault();
+        return false;
+    }
+    if (!ape || ape.length < 2) {
+        alert('Por favor ingresa los apellidos del estudiante (mínimo 2 caracteres).');
+        apellidoInput.focus();
+        e.preventDefault();
+        return false;
+    }
+    if (!car) {
+        alert('Por favor selecciona una carrera técnica de la lista.');
+        carreraInput.focus();
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
+const codigoSugeridoPorDefecto = '<?= $siguienteCodigo ?? "EST009" ?>';
+
+function generarCodigoSugerido() {
+    codigoInput.value = codigoSugeridoPorDefecto;
+}
+
 function abrirModalCrear() {
     modalTitulo.textContent = 'Registrar Nuevo Estudiante';
     form.action = '<?= $base ?>/estudiantes/crear';
     idInput.value = '';
-    codigoInput.value = '';
+    codigoInput.value = codigoSugeridoPorDefecto; // Sugerido automáticamente, pero editable
     nombreInput.value = '';
     apellidoInput.value = '';
     carreraInput.value = '';
     modal.style.display = 'flex';
-    setTimeout(() => codigoInput.focus(), 60);
+    setTimeout(() => nombreInput.focus(), 60); // Enfoca directo en el nombre para escribir de inmediato
 }
 
 function abrirModalEditar(estudiante) {
