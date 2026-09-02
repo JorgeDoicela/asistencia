@@ -1,5 +1,13 @@
 <?php
 
+// Soporte para servidor web integrado de PHP (php -S)
+if (php_sapi_name() === 'cli-server') {
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    if ($path !== '/' && is_file(__DIR__ . $path)) {
+        return false;
+    }
+}
+
 // Punto de Entrada Principal (Front Controller)
 // Recibe las peticiones del navegador y llama al controlador correspondiente
 

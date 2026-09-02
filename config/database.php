@@ -15,7 +15,7 @@ class Database
             $port   = getenv('DB_PORT') ?: '3306';
             $dbname = getenv('DB_NAME') ?: 'asistencia_qr';
             $user   = getenv('DB_USER') ?: 'root';
-            $pass   = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+            $pass   = (getenv('DB_PASS') !== false && getenv('DB_PASS') !== '') ? getenv('DB_PASS') : '12345';
 
             try {
                 $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";

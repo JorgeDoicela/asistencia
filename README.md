@@ -60,34 +60,56 @@ asistencia/
 
 ---
 
-## Despliegue y Ejecución en XAMPP y MySQL Workbench
+## Despliegue y Ejecución del Proyecto
 
-El sistema corre de forma nativa sobre servidores web Apache con PHP 8.x y bases de datos MySQL / MariaDB instaladas localmente.
+El sistema puede ejecutarse en cualquier computadora mediante dos métodos estándar según el software que tengas instalado:
 
-### Pasos de Instalación:
+---
 
-1. **Colocar el Proyecto:**
-   * Copia o clona la carpeta `asistencia` dentro del directorio `htdocs` de tu servidor XAMPP:
-     `C:\xampp\htdocs\asistencia` (en Windows) o `/opt/lampp/htdocs/asistencia` (en Linux).
+### Método 1: Con XAMPP (Apache + MySQL / phpMyAdmin)
 
-2. **Crear e Importar la Base de Datos:**
-   * Abre **MySQL Workbench** o **phpMyAdmin** (`http://localhost/phpmyadmin`).
-   * Abre y ejecuta el script SQL ubicado en [`database/database.sql`](database/database.sql).
-   * Este script creará automáticamente la base de datos `asistencia_qr`, sus 4 tablas relacionales (`docentes`, `estudiantes`, `sesiones`, `asistencias`) y cargará los datos iniciales de prueba.
+Ideal si utilizas la suite completa de XAMPP:
 
-3. **Iniciar Servicios:**
-   * Abre el Panel de Control de XAMPP e inicia los módulos de **Apache** y **MySQL**.
+1. **Ubicación de la carpeta:**
+   * Copia o clona la carpeta `asistencia` dentro de `htdocs`:
+     * Windows: `C:\xampp\htdocs\asistencia`
+     * Linux: `/opt/lampp/htdocs/asistencia`
+2. **Importar la Base de Datos:**
+   * Inicia **Apache** y **MySQL** desde el Panel de XAMPP.
+   * Ingresa a phpMyAdmin (`http://localhost/phpmyadmin`).
+   * Crea una base de datos o importa directamente el script [`database/database.sql`](database/database.sql).
+3. **Acceder a la Aplicación:**
+   * Computadora local: `http://localhost/asistencia/`
+   * Teléfono móvil en la misma red Wi-Fi: `http://<IP_LOCAL>/asistencia/` *(ejemplo: `http://192.168.1.15/asistencia/`)*.
 
-4. **Acceder a la Aplicación:**
-   * Abre tu navegador web e ingresa a:
-     ```text
-     http://localhost/asistencia/
+---
+
+### Método 2: Con MySQL Workbench + PHP Standalone (Sin XAMPP)
+
+Ideal si solo tienes instalado el motor MySQL oficial con MySQL Workbench:
+
+1. **Importar la Base de Datos en MySQL Workbench:**
+   * Abre **MySQL Workbench** y conéctate a tu instancia local (`localhost:3306`).
+   * Abre el archivo [`database/database.sql`](database/database.sql) (*File -> Open SQL Script*).
+   * Ejecuta el script (ícono de rayo). Se creará la base de datos `asistencia_qr` con todas sus tablas y registros de prueba.
+2. **Configuración de Contraseña ([`config/Database.php`](config/Database.php)):**
+   * El sistema viene preconfigurado con la clave `12345`. Si tu usuario `root` de MySQL tiene otra clave, ajústala en la línea 18 de `config/Database.php` o mediante la variable de entorno `DB_PASS`.
+3. **Instalar y Configurar PHP (si no lo tienes en el sistema):**
+   * Descarga PHP 8.2 o 8.3 para Windows (Non-Thread Safe o Thread Safe) y descomprímelo en `C:\php`.
+   * En `C:\php\php.ini`, asegúrate de tener habilitadas las extensiones:
+     ```ini
+     extension_dir = "C:\php\ext"
+     extension=pdo_mysql
+     extension=mbstring
      ```
-   * *Para acceso desde teléfonos móviles en la misma red Wi-Fi:*
-     ```text
-     http://<IP_LOCAL>/asistencia/
+4. **Iniciar el Servidor Web Integrado:**
+   * Abre una terminal (PowerShell o CMD) en la carpeta del proyecto y ejecuta:
+     ```powershell
+     php -S 0.0.0.0:8085 -t public public/index.php
      ```
-     *(ejemplo: `http://192.168.1.15/asistencia/`)*.
+5. **Acceder a la Aplicación:**
+   * Computadora local: `http://localhost:8085/`
+   * Teléfono móvil en la misma red Wi-Fi: `http://<IP_LOCAL>:8085/` *(ejemplo: `http://192.168.1.15:8085/`)*.
 
 ---
 
@@ -101,15 +123,33 @@ El sistema corre de forma nativa sobre servidores web Apache con PHP 8.x y bases
 
 ---
 
-## Documentación Técnica Detallada
+## Documentación Técnica Consolidada para Estudio y Defensa
 
-En la carpeta [`docs/`](docs/) encontrarás las especificaciones completas:
-* [docs/auditoria_codigo_linea_a_linea.md](docs/auditoria_codigo_linea_a_linea.md): Auditoría exhaustiva línea a línea de todo el código fuente del sistema.
-* [docs/arquitectura.md](docs/arquitectura.md): Explicación del patrón MVC pedagógico y flujo de peticiones.
-* [docs/diseno_ux_ui_y_flujos.md](docs/diseno_ux_ui_y_flujos.md): Diseño UX/UI, escáner de cámara HUD, feedback de audio y adaptabilidad móvil.
-* [docs/modulo_reportes_y_exportacion.md](docs/modulo_reportes_y_exportacion.md): Especificación del módulo de reportes y exportaciones en CSV, Excel y PDF.
-* [docs/base_de_datos.md](docs/base_de_datos.md): Esquema relacional, tablas, índices y reglas de integridad.
-* [docs/api_y_rutas.md](docs/api_y_rutas.md): Catálogo de endpoints HTTP y API JSON de tiempo real.
-* [docs/manual_usuario.md](docs/manual_usuario.md): Manual de uso para docentes y estudiantes.
-* [docs/guia_pruebas.md](docs/guia_pruebas.md): Guía de pruebas paso a paso desde PC y móvil por Wi-Fi.
-* [docs/despliegue_y_mantenimiento.md](docs/despliegue_y_mantenimiento.md): Configuración en XAMPP, MySQL Workbench y respaldos.
+Toda la documentación técnica del proyecto se encuentra estructurada y consolidada en **4 documentos maestros** ubicados en [`docs/`](docs/) sin omisión de detalles:
+
+1. **[docs/1_arquitectura_mvc_y_base_de_datos.md](docs/1_arquitectura_mvc_y_base_de_datos.md):**
+   * Fundamentos del patrón MVC clásico y ciclo de vida de peticiones HTTP.
+   * Diccionario completo de base de datos (`docentes`, `estudiantes`, `sesiones`, `asistencias`).
+   * Relaciones, claves primarias, foráneas y restricción `UNIQUE` de asistencia única.
+   * Catálogo de rutas y API JSON de tiempo real (`/api/asistencias/activas`).
+
+2. **[docs/2_auditoria_codigo_linea_a_linea.md](docs/2_auditoria_codigo_linea_a_linea.md):**
+   * Auditoría técnica línea a línea de cada archivo del sistema.
+   * Análisis de Controladores, Modelos, Vistas y Bibliotecas (`ReportePdf.php`).
+   * Especificaciones de exportación multiformato (CSV BOM UTF-8, Excel SpreadsheetML y PDF A4 Landscape).
+   * Análisis de seguridad (PDO parametrizado anti-SQLi, escapado XSS y control de sesiones).
+
+3. **[docs/3_diseno_ux_ui_y_componentes.md](docs/3_diseno_ux_ui_y_componentes.md):**
+   * Filosofía de diseño, principios de usabilidad y mapa de flujos interactivo.
+   * Modo Proyector de aula para pantallas gigantes.
+   * Escáner de cámara integrado con detección por hardware y fallback local a 800px.
+   * Feedback acústico con Web Audio API pura (`AudioContext`).
+   * Sugerencia correlativa de códigos de alumnos (`EST009`).
+   * Matriz responsiva en cascada (Desktop, Tablets, Móviles y Pantallas estrechas).
+
+4. **[docs/4_guia_instalacion_pruebas_y_defensa.md](docs/4_guia_instalacion_pruebas_y_defensa.md):**
+   * Guía completa de instalación para XAMPP y MySQL Workbench + PHP Standalone.
+   * Tabla de resolución de problemas comunes (Troubleshooting).
+   * Manual de usuario paso a paso para docentes y alumnos.
+   * Guía de pruebas en PC y móvil por Wi-Fi.
+   * Guía de defensa ante el tribunal docente con preguntas frecuentes y respuestas recomendadas.
