@@ -9,78 +9,67 @@ Instrucciones técnicas para desplegar, configurar y respaldar el sistema en ent
 * **PHP:** Versión 8.0 o superior (recomendado PHP 8.2).
 * **Extensiones PHP:** `pdo`, `pdo_mysql`, `mbstring`.
 * **Servidor Web:** Apache 2.4 con módulo `mod_rewrite` activado.
-* **Base de Datos:** MariaDB 10.4+ o MySQL 8.0+.
-* **Opcional:** Docker y Docker Compose para despliegue contenerizado.
+* **Base de Datos:** MySQL 8.0+ o MariaDB 10.4+ (gestionable mediante MySQL Workbench o phpMyAdmin).
 
 ---
 
-## 2. Despliegue con Docker (Recomendado para Producción y Staging)
+## 2. Despliegue en XAMPP y Servidores Locales
 
-El proyecto incluye configuración de Docker Compose con 3 servicios:
-* `web`: Servidor Apache con PHP 8.2 y extensiones configuradas.
-* `db`: Base de datos MariaDB 10.6 con volumen persistente y script inicializador.
-* `phpmyadmin`: Gestor web de base de datos.
+El sistema está optimizado para ejecutarse directamente sobre XAMPP (Windows o Linux):
 
-### Pasos:
-1. Iniciar los contenedores:
-   ```bash
-   docker compose up -d --build
-   ```
-2. Verificar el estado de los contenedores:
-   ```bash
-   docker compose ps
-   ```
-3. Accesos:
-   * **Sistema Web:** `http://<HOST>:8080/` (ej. `http://localhost:8080/` o `http://<IP_LOCAL>:8080/`)
-   * **phpMyAdmin:** `http://<HOST>:8081/` (ej. `http://localhost:8081/`)
+### 2.1. Instalación del Código
+1. Copia o clona la carpeta `asistencia` dentro del directorio `htdocs` de XAMPP:
+   * **Windows:** `C:\xampp\htdocs\asistencia`
+   * **Linux:** `/opt/lampp/htdocs/asistencia`
+2. Verifica que el módulo `mod_rewrite` de Apache se encuentre habilitado en `httpd.conf`.
+3. Inicia los servicios de **Apache** y **MySQL** desde el Panel de Control de XAMPP.
 
----
+### 2.2. Importación de la Base de Datos con MySQL Workbench o phpMyAdmin
+1. Abre **MySQL Workbench** o **phpMyAdmin** (`http://localhost/phpmyadmin`).
+2. Abre el archivo [`database/database.sql`](../database/database.sql).
+3. Ejecuta el script completo. Se creará la base de datos `asistencia_qr`, las tablas relacionales y los datos de prueba.
 
-## 3. Despliegue en Servidores Locales (XAMPP / WampServer / LAMP)
-
-1. Copia la carpeta del proyecto dentro del directorio web raíz:
-   * **XAMPP / LAMP:** `<directorio_web>/htdocs/asistencia`
-2. Inicia los servicios de **Apache** y **MySQL** en tu gestor de servicios.
-3. Ingresa a phpMyAdmin (`http://<HOST>/phpmyadmin`) e importa el archivo `database/database.sql`.
-4. Accede desde tu navegador web a:
-   ```text
-   http://<HOST>/asistencia/
-   ```
-   *(ejemplo: `http://localhost/asistencia/` o `http://<IP_LOCAL>/asistencia/`)*.
-5. La aplicación redirigirá automáticamente el tráfico de la raíz a `public/` gracias al archivo `.htaccess`.
+### 2.3. Acceso al Sistema
+* **Desde la Computadora:**
+  ```text
+  http://localhost/asistencia/
+  ```
+* **Desde Dispositivos Móviles (Red Wi-Fi):**
+  ```text
+  http://<IP_LOCAL>/asistencia/
+  ```
+  *(ejemplo: `http://192.168.1.15/asistencia/`)*.
 
 ---
 
-## 4. Variables de Entorno
+## 3. Configuración de Base de Datos
 
-El sistema lee las variables de entorno para la conexión en `config/database.php`. Si no se definen, utiliza valores por defecto compatibles con XAMPP:
+El sistema lee los parámetros de conexión en `config/Database.php`. Por defecto utiliza los valores estándar de XAMPP y MySQL Workbench:
 
 | Variable | Descripción | Valor por Defecto |
 |---|---|---|
-| `DB_HOST` | Host del servidor de base de datos | `localhost` |
+| `DB_HOST` | Host del servidor MySQL | `localhost` |
 | `DB_PORT` | Puerto de conexión MySQL | `3306` |
 | `DB_NAME` | Nombre de la base de datos | `asistencia_qr` |
 | `DB_USER` | Usuario de la base de datos | `root` |
 | `DB_PASS` | Contraseña de la base de datos | `""` (vacío) |
 
+Si tu servidor MySQL Workbench cuenta con una contraseña personalizada para el usuario `root` (ej. `root`, `admin123`), puedes definir la variable de entorno `DB_PASS` o editar directamente el archivo `config/Database.php`.
+
 ---
 
-## 5. Mantenimiento y Respaldos
+## 4. Mantenimiento y Respaldos
 
-### 5.1. Respaldar la Base de Datos
-Para generar un dump de respaldo de la base de datos en Docker:
-```bash
-docker exec asistencia_qr_db mysqldump -u root -prootpassword asistencia_qr > backup_asistencia_$(date +%Y%m%d).sql
-```
-
-En entornos tradicionales con `mysqldump`:
+### 4.1. Respaldar la Base de Datos
+Desde MySQL Workbench (opción *Data Export*) o mediante la línea de comandos con `mysqldump`:
 ```bash
 mysqldump -u root -p asistencia_qr > backup_asistencia.sql
 ```
 
-### 5.2. Restaurar Respaldo
+### 4.2. Restaurar Respaldo
+Desde MySQL Workbench (opción *Data Import*) o mediante la terminal:
 ```bash
-docker exec -i asistencia_qr_db mysql -u root -prootpassword asistencia_qr < backup_asistencia.sql
+mysql -u root -p asistencia_qr < backup_asistencia.sql
 ```
 
 ### 5.3. Agregar Nuevos Docentes

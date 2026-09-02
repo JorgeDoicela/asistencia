@@ -64,7 +64,7 @@ asistencia/
 ### `public/index.php`
 * **Líneas 7-12:** Importación de los controladores mediante `require_once`.
 * **Líneas 15-19:** Extracción del path de la URI solicitada mediante `parse_url` y obtención del método HTTP (`GET`, `POST`, transformando `HEAD` a `GET` para inspección de encabezados).
-* **Líneas 22-26:** Cálculo automático del prefijo de subdirectorio (para compatibilidad total tanto en raíz de Docker como en subcarpetas de XAMPP como `/asistencia/public`). Normalización de la variable `$ruta`.
+* **Líneas 22-26:** Cálculo dinámico y automático del prefijo de subdirectorio para compatibilidad nativa en subcarpetas de XAMPP (como `/asistencia` o `/asistencia/public`) o dominios virtuales independientes. Normalización de la variable `$ruta`.
 * **Líneas 29-115:** Sentencia `switch ("{$metodo} {$ruta}")` que despacha las 20 rutas disponibles:
   * `GET /`: Despacha `HomeController->index()`.
   * `GET /institucional`: Despacha `HomeController->institucional()`.

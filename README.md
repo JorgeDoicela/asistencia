@@ -42,9 +42,7 @@ asistencia/
 │   └── assets/                 # Hojas de estilo CSS, scripts JS e imágenes
 ├── database/                   # Script de creacion y datos de prueba
 │   └── database.sql
-├── docs/                       # Documentacion tecnica y manuales
-├── docker-compose.yml          # Despliegue automatico con Docker
-└── Dockerfile                  # Configuracion de servidor PHP Apache
+└── docs/                       # Documentacion tecnica y manuales
 ```
 
 ---
@@ -62,31 +60,34 @@ asistencia/
 
 ---
 
-## Despliegue y Ejecución Dinámica
+## Despliegue y Ejecución en XAMPP y MySQL Workbench
 
-El sistema detecta automáticamente su entorno de ejecución (Docker, XAMPP, Nginx o IP de red local) y ajusta sus rutas y enlaces de forma 100% dinámica mediante `$base`.
+El sistema corre de forma nativa sobre servidores web Apache con PHP 8.x y bases de datos MySQL / MariaDB instaladas localmente.
 
-### Opción 1: Con Docker (Contenerizado)
-```bash
-docker compose up -d --build
-```
-* **Aplicación Web:** `http://<HOST>:8080/` (ej. `http://localhost:8080/` o `http://<IP_LOCAL>:8080/`)
-* **phpMyAdmin:** `http://<HOST>:8081/` (ej. `http://localhost:8081/`)
+### Pasos de Instalación:
 
-### Ejecutar Pruebas Automatizadas (Tests)
-Para ejecutar la suite de pruebas unitarias y de integración:
-```bash
-docker compose exec web php tests/test_runner.php
-```
+1. **Colocar el Proyecto:**
+   * Copia o clona la carpeta `asistencia` dentro del directorio `htdocs` de tu servidor XAMPP:
+     `C:\xampp\htdocs\asistencia` (en Windows) o `/opt/lampp/htdocs/asistencia` (en Linux).
 
-### Opción 2: Con XAMPP / Apache Tradicional
-1. Clona o copia la carpeta `asistencia` dentro del directorio web (`htdocs/` en Windows/Linux).
-2. Importa el archivo `database/database.sql` en tu gestor de base de datos (`asistencia_qr`).
-3. Accede desde tu navegador web a:
-   ```text
-   http://<HOST>/asistencia/
-   ```
-   *(ejemplo: `http://localhost/asistencia/` o `http://<IP_LOCAL>/asistencia/`)*.
+2. **Crear e Importar la Base de Datos:**
+   * Abre **MySQL Workbench** o **phpMyAdmin** (`http://localhost/phpmyadmin`).
+   * Abre y ejecuta el script SQL ubicado en [`database/database.sql`](database/database.sql).
+   * Este script creará automáticamente la base de datos `asistencia_qr`, sus 4 tablas relacionales (`docentes`, `estudiantes`, `sesiones`, `asistencias`) y cargará los datos iniciales de prueba.
+
+3. **Iniciar Servicios:**
+   * Abre el Panel de Control de XAMPP e inicia los módulos de **Apache** y **MySQL**.
+
+4. **Acceder a la Aplicación:**
+   * Abre tu navegador web e ingresa a:
+     ```text
+     http://localhost/asistencia/
+     ```
+   * *Para acceso desde teléfonos móviles en la misma red Wi-Fi:*
+     ```text
+     http://<IP_LOCAL>/asistencia/
+     ```
+     *(ejemplo: `http://192.168.1.15/asistencia/`)*.
 
 ---
 
@@ -111,4 +112,4 @@ En la carpeta [`docs/`](docs/) encontrarás las especificaciones completas:
 * [docs/api_y_rutas.md](docs/api_y_rutas.md): Catálogo de endpoints HTTP y API JSON de tiempo real.
 * [docs/manual_usuario.md](docs/manual_usuario.md): Manual de uso para docentes y estudiantes.
 * [docs/guia_pruebas.md](docs/guia_pruebas.md): Guía de pruebas paso a paso desde PC y móvil por Wi-Fi.
-* [docs/despliegue_y_mantenimiento.md](docs/despliegue_y_mantenimiento.md): Variables de entorno, Docker y respaldos.
+* [docs/despliegue_y_mantenimiento.md](docs/despliegue_y_mantenimiento.md): Configuración en XAMPP, MySQL Workbench y respaldos.

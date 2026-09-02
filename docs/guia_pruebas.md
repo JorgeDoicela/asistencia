@@ -1,21 +1,20 @@
 # Guía de Pruebas y Uso del Sistema de Asistencia QR
 
-Esta guía detalla el procedimiento paso a paso para probar y validar el funcionamiento del sistema en cualquier entorno de ejecución (Docker, XAMPP, Nginx) tanto desde la computadora como desde un teléfono móvil conectado a la misma red Wi-Fi.
+Esta guía detalla el procedimiento paso a paso para probar y validar el funcionamiento del sistema en XAMPP y MySQL Workbench tanto desde la computadora como desde un teléfono móvil conectado a la misma red Wi-Fi.
 
 ---
 
-## Rutas Dinámicas de Acceso y Credenciales
+## Rutas de Acceso y Credenciales
 
-El sistema resuelve automáticamente la variable `$base` para operar en la raíz del dominio o en subdirectorios:
+El sistema resuelve automáticamente la variable `$base` para operar directamente en subcarpetas de XAMPP:
 
-| Servicio / Rol | URL Dinámica (Docker) | URL Dinámica (XAMPP) | Credenciales |
+| Servicio / Rol | URL en Computadora (Localhost) | URL en Móvil / Red Wi-Fi | Credenciales |
 | :--- | :--- | :--- | :--- |
-| **Panel Docente (PC)** | `http://<HOST>:8080/login` | `http://<HOST>/asistencia/login` | Usuario: `profesor`<br>Clave: `12345` |
-| **Panel Docente (Red Wi-Fi)** | `http://<IP_LOCAL>:8080/login` | `http://<IP_LOCAL>/asistencia/login` | Usuario: `profesor`<br>Clave: `12345` |
-| **Docente Secundario (Demo)** | `http://<HOST>:8080/login` | `http://<HOST>/asistencia/login` | Usuario: `Demo`<br>Clave: `Demo123` |
-| **Escaneo de Asistencia** | `http://<HOST>:8080/asistencia/escanear` | `http://<HOST>/asistencia/asistencia/escanear` | Acceso directo / QR |
-| **Portal del Estudiante** | `http://<HOST>:8080/login-estudiante` | `http://<HOST>/asistencia/login-estudiante` | Código (ej. `EST001`) |
-| **phpMyAdmin** | `http://<HOST>:8081` | `http://<HOST>/phpmyadmin` | Servidor: `db` / `localhost` |
+| **Panel Docente** | `http://localhost/asistencia/login` | `http://<IP_LOCAL>/asistencia/login` | Usuario: `profesor`<br>Clave: `12345` |
+| **Docente Secundario (Demo)** | `http://localhost/asistencia/login` | `http://<IP_LOCAL>/asistencia/login` | Usuario: `Demo`<br>Clave: `Demo123` |
+| **Escaneo de Asistencia** | `http://localhost/asistencia/asistencia/escanear` | `http://<IP_LOCAL>/asistencia/asistencia/escanear` | Acceso directo / QR |
+| **Portal del Estudiante** | `http://localhost/asistencia/login-estudiante` | `http://<IP_LOCAL>/asistencia/login-estudiante` | Código (ej. `EST001`) |
+| **phpMyAdmin / Workbench** | `http://localhost/phpmyadmin` | Puerto `3306` | Usuario: `root`<br>Base: `asistencia_qr` |
 
 ---
 
@@ -25,23 +24,22 @@ Para que los estudiantes puedan escanear el código QR con la cámara de sus tel
 
 1. Asegúrate de que la computadora y el teléfono estén conectados a la misma red Wi-Fi.
 2. Obtén la IP local de tu computadora:
-   * En Windows: ejecuta `ipconfig` en PowerShell / CMD (busca la Dirección IPv4 del adaptador Wi-Fi, ejemplo: `192.168.X.X`).
-   * En Linux / macOS: ejecuta `hostname -I` o `ifconfig`.
+   * En Windows: ejecuta `ipconfig` en PowerShell / CMD (busca la Dirección IPv4 del adaptador Wi-Fi, ejemplo: `192.168.1.15`).
+   * En Linux: ejecuta `hostname -I` o `ifconfig`.
 3. Abre el panel docente en tu computadora utilizando tu IP local:
-   * En Docker: `http://<IP_LOCAL>:8080/login`
-   * En XAMPP: `http://<IP_LOCAL>/asistencia/login`
+   * `http://<IP_LOCAL>/asistencia/login` (ej. `http://192.168.1.15/asistencia/login`).
 4. Inicia sesión y genera el QR de clase:
-   * El sistema detecta dinámicamente tu IP (`$_SERVER['HTTP_HOST']`) y codifica el QR con la URL accesible para todos los dispositivos de la red local:
-     `http://<IP_LOCAL>:8080/asistencia/escanear?codigo=<CODIGO_SESION>`
+   * El sistema detecta dinámicamente tu IP local (`$_SERVER['HTTP_HOST']`) y codifica el QR con la URL accesible para todos los dispositivos de la red:
+     `http://<IP_LOCAL>/asistencia/asistencia/escanear?codigo=<CODIGO_SESION>`
 5. Escanea desde el celular:
-   * Con la cámara de tu teléfono o ingresando directamente a la pantalla de escaneo web en `http://<IP_LOCAL>:8080/asistencia/escanear`.
+   * Con la cámara de tu teléfono o abriendo el navegador móvil en `http://<IP_LOCAL>/asistencia/asistencia/escanear`.
 
 ---
 
 ## Guía Paso a Paso para Probar el Sistema
 
 ### 1. Iniciar Sesión como Docente
-1. Abre tu navegador e ingresa a la ruta de login: `http://<HOST>:8080/login` (o `http://localhost/asistencia/login`).
+1. Abre tu navegador e ingresa a la ruta de login: `http://localhost/asistencia/login`.
 2. Ingresa las credenciales de prueba:
    * Usuario: `profesor`
    * Contraseña: `12345`
