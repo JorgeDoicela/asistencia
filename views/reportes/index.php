@@ -1,94 +1,194 @@
 <?php
 $titulo = 'Reportes de Asistencia - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
+
+$queryExport = http_build_query([
+    'fecha_inicio' => $filtros['fecha_inicio'] ?? '',
+    'fecha_fin'    => $filtros['fecha_fin'] ?? '',
+    'materia'      => $filtros['materia'] ?? '',
+    'busqueda'     => $filtros['busqueda'] ?? ''
+]);
 ?>
 
-<div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+<nav class="breadcrumb">
+    <a href="<?= $base ?>/dashboard">Panel Docente</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Reportes de Asistencia</span>
+</nav>
+
+<div class="page-header">
     <div>
-        <h1 style="color: var(--azul-marino); font-size: 1.8rem; font-weight: 800;">Reportes de Asistencia</h1>
-        <p style="color: var(--texto-secundario); font-size: 0.95rem;">Filtra registros por fecha, materia o estudiante y expórtalos en formato CSV</p>
+        <h1 class="page-title">Reportes de Asistencia</h1>
+        <p class="page-subtitle">Filtra, consulta y exporta los registros de asistencia académica</p>
     </div>
-    <div>
-        <a href="<?= $base ?>/reportes/csv?fecha_inicio=<?= urlencode($fechaInicio ?? '') ?>&fecha_fin=<?= urlencode($fechaFin ?? '') ?>&materia=<?= urlencode($materia ?? '') ?>&busqueda=<?= urlencode($busqueda ?? '') ?>" 
-           class="btn btn-dorado">
-            Descargar CSV (Excel)
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="<?= $base ?>/dashboard" class="btn btn-back" title="Regresar al panel principal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Volver al Panel QR
+        </a>
+
+        <a href="<?= $base ?>/reportes/csv?<?= $queryExport ?>" 
+           class="btn btn-outline" title="Exportar reporte en formato CSV">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            Descargar CSV
+        </a>
+
+        <a href="<?= $base ?>/reportes/excel?<?= $queryExport ?>" 
+           class="btn btn-excel" title="Descargar libro de Microsoft Excel (.xls)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+            Descargar Excel
+        </a>
+
+        <a href="<?= $base ?>/reportes/pdf?<?= $queryExport ?>" 
+           class="btn btn-pdf" title="Descargar documento oficial en PDF">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-6"></path><path d="m9 15 3 3 3-3"></path></svg>
+            Descargar PDF
         </a>
     </div>
 </div>
 
-<!-- Filtros de Búsqueda -->
-<div style="background: white; border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 24px;">
-    <form method="GET" action="<?= $base ?>/reportes" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: end;">
-        <div>
-            <label for="fecha_inicio" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Desde:</label>
-            <input type="date" id="fecha_inicio" name="fecha_inicio" value="<?= htmlspecialchars($fechaInicio ?? '') ?>"
-                   style="width: 100%; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.9rem;">
+<!-- Formulario de Filtros -->
+<div class="card card-filter mb-6">
+    <div class="d-flex justify-content-between align-center flex-wrap gap-2 mb-3">
+        <span class="text-primary font-bold" style="font-size: 0.95rem;">Filtros de Búsqueda</span>
+        <div class="d-flex gap-2 flex-wrap">
+            <span class="text-muted" style="font-size: 0.8rem; align-self: center;">Periodo rápido:</span>
+            <button type="button" onclick="establecerPeriodo('hoy')" class="chip-btn">Hoy</button>
+            <button type="button" onclick="establecerPeriodo('mes')" class="chip-btn">Este Mes</button>
+            <button type="button" onclick="establecerPeriodo('30dias')" class="chip-btn">Últimos 30 días</button>
+            <button type="button" onclick="establecerPeriodo('todo')" class="chip-btn">Todo el Historial</button>
         </div>
-
-        <div>
-            <label for="fecha_fin" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Hasta:</label>
-            <input type="date" id="fecha_fin" name="fecha_fin" value="<?= htmlspecialchars($fechaFin ?? '') ?>"
-                   style="width: 100%; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.9rem;">
-        </div>
-
-        <div>
-            <label for="materia" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Materia:</label>
-            <input type="text" id="materia" name="materia" value="<?= htmlspecialchars($materia ?? '') ?>" placeholder="Ej: Programación"
-                   style="width: 100%; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.9rem;">
-        </div>
-
-        <div>
-            <label for="busqueda" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">Estudiante (código/nombre):</label>
-            <input type="text" id="busqueda" name="busqueda" value="<?= htmlspecialchars($busqueda ?? '') ?>" placeholder="Ej: Juan o EST001"
-                   style="width: 100%; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.9rem;">
-        </div>
-
-        <div style="display: flex; gap: 8px;">
-            <button type="submit" class="btn btn-primary" style="flex: 1;">Filtrar</button>
-            <a href="<?= $base ?>/reportes" class="btn btn-outline">Limpiar</a>
-        </div>
-    </form>
-</div>
-
-<!-- Tabla de Resultados -->
-<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="color: var(--azul-marino); font-size: 1.15rem; font-weight: 700;">Resultados Encontrados</h3>
-        <span style="font-weight: 700; color: var(--azul-marino); background: var(--fondo); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem;">
-            <?= $total ?> asistencias
-        </span>
     </div>
 
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+    <form method="GET" action="<?= $base ?>/reportes" class="filter-form-grid" id="formFiltrosReporte">
+        <div class="form-group mb-0">
+            <label for="fecha_inicio" class="form-label">Fecha Desde</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" 
+                   value="<?= htmlspecialchars($filtros['fecha_inicio'] ?? '') ?>" class="form-control">
+        </div>
+
+        <div class="form-group mb-0">
+            <label for="fecha_fin" class="form-label">Fecha Hasta</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" 
+                   value="<?= htmlspecialchars($filtros['fecha_fin'] ?? '') ?>" class="form-control">
+        </div>
+
+        <div class="form-group mb-0">
+            <label for="materia" class="form-label">Materia</label>
+            <input type="text" id="materia" name="materia" 
+                   value="<?= htmlspecialchars($filtros['materia'] ?? '') ?>" 
+                   placeholder="Ej: Programacion Web" class="form-control">
+        </div>
+
+        <div class="form-group mb-0">
+            <label for="busqueda" class="form-label">Estudiante / Código</label>
+            <input type="text" id="busqueda" name="busqueda" 
+                   value="<?= htmlspecialchars($filtros['busqueda'] ?? '') ?>" 
+                   placeholder="Ej: EST001 o Pérez" class="form-control">
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-1">Filtrar</button>
+            <a href="<?= $base ?>/reportes" class="btn btn-outline" title="Restablecer filtros">Limpiar</a>
+        </div>
+    </form>
+
+    <?php 
+    $hayFiltrosActivos = !empty($filtros['materia']) || !empty($filtros['busqueda']) || (!empty($filtros['fecha_inicio']) && $filtros['fecha_inicio'] !== date('Y-m-01'));
+    if ($hayFiltrosActivos): ?>
+        <div class="d-flex gap-2 flex-wrap align-center mt-3 pt-3" style="border-top: 1px dashed var(--color-border);">
+            <span class="text-muted" style="font-size: 0.8rem; font-weight: 600;">Filtros activos:</span>
+            <?php if (!empty($filtros['materia'])): ?>
+                <span class="filter-pill">
+                    Materia: <?= htmlspecialchars($filtros['materia']) ?>
+                </span>
+            <?php endif; ?>
+            <?php if (!empty($filtros['busqueda'])): ?>
+                <span class="filter-pill">
+                    Estudiante: <?= htmlspecialchars($filtros['busqueda']) ?>
+                </span>
+            <?php endif; ?>
+            <?php if (!empty($filtros['fecha_inicio'])): ?>
+                <span class="filter-pill">
+                    Desde: <?= htmlspecialchars($filtros['fecha_inicio']) ?>
+                </span>
+            <?php endif; ?>
+            <?php if (!empty($filtros['fecha_fin'])): ?>
+                <span class="filter-pill">
+                    Hasta: <?= htmlspecialchars($filtros['fecha_fin']) ?>
+                </span>
+            <?php endif; ?>
+            <a href="<?= $base ?>/reportes" class="text-danger" style="font-size: 0.8rem; text-decoration: underline; margin-left: 4px;">
+                Quitar todos
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script>
+function establecerPeriodo(tipo) {
+    const inicio = document.getElementById('fecha_inicio');
+    const fin = document.getElementById('fecha_fin');
+    const hoy = new Date();
+    const formato = d => d.toISOString().split('T')[0];
+
+    if (tipo === 'hoy') {
+        inicio.value = formato(hoy);
+        fin.value = formato(hoy);
+    } else if (tipo === 'mes') {
+        const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        inicio.value = formato(primerDia);
+        fin.value = formato(hoy);
+    } else if (tipo === '30dias') {
+        const hace30 = new Date();
+        hace30.setDate(hoy.getDate() - 30);
+        inicio.value = formato(hace30);
+        fin.value = formato(hoy);
+    } else if (tipo === 'todo') {
+        inicio.value = '';
+        fin.value = '';
+    }
+    document.getElementById('formFiltrosReporte').submit();
+}
+</script>
+
+<!-- Tabla de Reporte -->
+<div class="card">
+    <div class="card-header-flex">
+        <h3 class="text-primary font-bold" style="font-size: 1.15rem;">Resultados Encontrados</h3>
+        <span class="badge badge-neutral">Total: <?= count($asistencias) ?> registros</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
             <thead>
-                <tr style="border-bottom: 2px solid var(--borde); color: var(--texto-secundario);">
-                    <th style="padding: 10px 12px;">Fecha</th>
-                    <th style="padding: 10px 12px;">Hora</th>
-                    <th style="padding: 10px 12px;">Código</th>
-                    <th style="padding: 10px 12px;">Estudiante</th>
-                    <th style="padding: 10px 12px;">Carrera</th>
-                    <th style="padding: 10px 12px;">Materia / Sesión</th>
-                    <th style="padding: 10px 12px;">Cód. Sesión</th>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Codigo</th>
+                    <th>Estudiante</th>
+                    <th>Carrera</th>
+                    <th>Materia</th>
+                    <th>Docente</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($asistencias)): ?>
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--texto-secundario);">
-                            No hay asistencias que coincidan con los filtros seleccionados.
+                        <td colspan="7" class="table-empty">
+                            No se encontraron asistencias para el periodo o criterio seleccionado.
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($asistencias as $r): ?>
-                        <tr style="border-bottom: 1px solid var(--borde);">
-                            <td style="padding: 10px 12px; font-weight: 600;"><?= htmlspecialchars($r['fecha']) ?></td>
-                            <td style="padding: 10px 12px; color: var(--azul-marino); font-weight: 600;"><?= htmlspecialchars($r['hora']) ?></td>
-                            <td style="padding: 10px 12px; font-family: monospace; font-weight: 700;"><?= htmlspecialchars($r['codigo']) ?></td>
-                            <td style="padding: 10px 12px;"><?= htmlspecialchars($r['estudiante']) ?></td>
-                            <td style="padding: 10px 12px; color: var(--texto-secundario);"><?= htmlspecialchars($r['carrera']) ?></td>
-                            <td style="padding: 10px 12px; font-weight: 500;"><?= htmlspecialchars($r['materia']) ?></td>
-                            <td style="padding: 10px 12px; font-family: monospace;"><?= htmlspecialchars($r['codigo_sesion']) ?></td>
+                    <?php foreach ($asistencias as $a): ?>
+                        <tr>
+                            <td class="font-semibold"><?= htmlspecialchars($a['fecha']) ?></td>
+                            <td class="font-semibold text-primary"><?= htmlspecialchars($a['hora']) ?></td>
+                            <td class="table-code"><?= htmlspecialchars($a['codigo']) ?></td>
+                            <td class="font-medium"><?= htmlspecialchars($a['estudiante']) ?></td>
+                            <td class="text-muted"><?= htmlspecialchars($a['carrera'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($a['materia']) ?></td>
+                            <td class="text-muted"><?= htmlspecialchars($a['docente']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

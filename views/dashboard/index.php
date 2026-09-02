@@ -3,12 +3,12 @@ $titulo = 'Panel de Control Docente - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
-<div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+<div class="page-header">
     <div>
-        <h1 style="color: var(--azul-marino); font-size: 1.8rem; font-weight: 800;">Panel de Asistencia</h1>
-        <p style="color: var(--texto-secundario); font-size: 0.95rem;">Gestiona sesiones en tiempo real con códigos QR dinámicos</p>
+        <h1 class="page-title">Panel de Asistencia</h1>
+        <p class="page-subtitle">Gestiona sesiones en tiempo real con codigos QR dinamicos</p>
     </div>
-    <div style="display: flex; gap: 10px;">
+    <div class="d-flex gap-2">
         <a href="<?= $base ?>/estudiantes" class="btn btn-outline">Gestionar Estudiantes</a>
         <a href="<?= $base ?>/reportes" class="btn btn-primary">Ver Reportes</a>
     </div>
@@ -26,88 +26,103 @@ require dirname(__DIR__) . '/layouts/header.php';
     </div>
 <?php endif; ?>
 
-<!-- Tarjetas de Métricas -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px;">
-    <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); border-left: 4px solid var(--azul-marino);">
-        <p style="font-size: 0.82rem; color: var(--texto-secundario); text-transform: uppercase; font-weight: 700;">Estudiantes Registrados</p>
-        <p style="font-size: 1.8rem; font-weight: 800; color: var(--azul-marino); margin-top: 6px;"><?= $totalEstudiantes ?></p>
+<!-- Tarjetas de Metricas (Minimalismo Limpio) -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Estudiantes Registrados</span>
+        <span class="stat-value"><?= $totalEstudiantes ?></span>
     </div>
-    <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); border-left: 4px solid var(--dorado);">
-        <p style="font-size: 0.82rem; color: var(--texto-secundario); text-transform: uppercase; font-weight: 700;">Asistencias Registradas Hoy</p>
-        <p style="font-size: 1.8rem; font-weight: 800; color: var(--dorado); margin-top: 6px;"><?= $asistenciasHoy ?></p>
+    <div class="stat-card">
+        <span class="stat-label">Asistencias Registradas Hoy</span>
+        <span class="stat-value"><?= $asistenciasHoy ?></span>
     </div>
-    <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); border-left: 4px solid var(--info);">
-        <p style="font-size: 0.82rem; color: var(--texto-secundario); text-transform: uppercase; font-weight: 700;">Total de Sesiones Creadas</p>
-        <p style="font-size: 1.8rem; font-weight: 800; color: var(--info); margin-top: 6px;"><?= $totalSesiones ?></p>
+    <div class="stat-card">
+        <span class="stat-label">Total de Sesiones Creadas</span>
+        <span class="stat-value"><?= $totalSesiones ?></span>
     </div>
 </div>
 
 <?php if ($sesionActiva): ?>
-    <!-- SESIÓN ACTIVA CON QR -->
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 36px; align-items: start;">
+    <!-- SESION ACTIVA CON QR -->
+    <div class="dashboard-grid">
         <!-- Tarjeta QR -->
-        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; border: 2px solid #e0e7ff;">
-            <div style="display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; letter-spacing: 0.5px;">
-                ● SESIÓN EN CURSO
-            </div>
-            <h3 style="color: var(--azul-marino); font-size: 1.2rem; margin-bottom: 4px;"><?= htmlspecialchars($sesionActiva['materia']) ?></h3>
-            <p style="color: var(--texto-secundario); font-size: 0.85rem; margin-bottom: 16px;">Inició a las <?= htmlspecialchars($sesionActiva['hora_inicio']) ?></p>
+        <div class="card qr-panel">
+            <span class="badge badge-info mb-4">
+                SESION EN CURSO
+            </span>
+            <h3 class="text-primary font-bold mb-2" style="font-size: 1.2rem;">
+                <?= htmlspecialchars($sesionActiva['materia']) ?>
+            </h3>
+            <p class="text-muted mb-4" style="font-size: 0.85rem;">
+                Inicio a las <?= htmlspecialchars($sesionActiva['hora_inicio']) ?>
+            </p>
 
-            <div style="background: white; padding: 12px; border: 1px solid var(--borde); border-radius: 10px; display: inline-block; margin-bottom: 16px;">
-                <img src="<?= $qrUrl ?>" alt="Código QR de Asistencia" style="width: 220px; height: 220px; display: block; border-radius: 4px;">
+            <div class="qr-code-box">
+                <img src="<?= $qrUrl ?>" alt="Codigo QR de Asistencia">
             </div>
 
-            <div style="background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 16px;">
-                <span style="font-size: 0.8rem; color: var(--texto-secundario); display: block; margin-bottom: 4px;">Código de Acceso Manual:</span>
-                <strong style="font-size: 1.6rem; color: var(--azul-marino); letter-spacing: 3px; font-family: monospace;"><?= htmlspecialchars($sesionActiva['codigo_sesion']) ?></strong>
+            <div class="d-flex gap-2 mb-4">
+                <button type="button" onclick="abrirProyector()" class="btn btn-primary flex-1 btn-sm" title="Proyectar en pantalla gigante para el aula">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    Modo Proyector
+                </button>
+                <button type="button" onclick="copiarEnlaceDirecto('<?= $qrUrl ?>')" class="btn btn-outline flex-1 btn-sm" title="Copiar enlace para compartir">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    Copiar Enlace
+                </button>
             </div>
 
-            <form action="<?= $base ?>/dashboard/sesion/cerrar" method="POST" onsubmit="return confirm('¿Está seguro de cerrar la sesión de asistencia? Los estudiantes ya no podrán registrarse.');">
+            <div class="access-code-box">
+                <span class="access-code-title">Codigo de Acceso Manual:</span>
+                <strong class="access-code-val"><?= htmlspecialchars($sesionActiva['codigo_sesion']) ?></strong>
+            </div>
+
+            <form action="<?= $base ?>/dashboard/sesion/cerrar" method="POST" onsubmit="return confirm('Esta seguro de cerrar la sesion de asistencia? Los estudiantes ya no podran registrarse.');">
                 <input type="hidden" name="sesion_id" value="<?= $sesionActiva['id'] ?>">
-                <button type="submit" class="btn btn-danger" style="width: 100%;">
-                    Finalizar Sesión de Clase
+                <button type="submit" class="btn btn-danger btn-block">
+                    Finalizar Sesion de Clase
                 </button>
             </form>
         </div>
 
         <!-- Tabla en vivo de asistencias -->
-        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--borde); padding-bottom: 12px;">
+        <div class="card">
+            <div class="card-header-flex">
                 <div>
-                    <h3 style="color: var(--azul-marino); font-size: 1.15rem; font-weight: 700;">Asistencias en Vivo</h3>
-                    <p style="color: var(--texto-secundario); font-size: 0.85rem;">Se actualiza automáticamente cada 5 segundos</p>
+                    <h3 class="text-primary font-bold" style="font-size: 1.2rem;">Asistencias en Vivo</h3>
+                    <p class="text-muted" style="font-size: 0.85rem;">Se actualiza automaticamente cada 5 segundos</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span id="liveIndicator" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--exito);"></span>
-                    <span id="contadorAsistencias" style="font-weight: 700; color: var(--azul-marino); font-size: 1.1rem;"><?= count($asistenciasSesion) ?></span>
-                    <span style="color: var(--texto-secundario); font-size: 0.85rem;">presentes</span>
+                <div class="d-flex align-center gap-2">
+                    <span id="liveIndicator" class="live-indicator"></span>
+                    <span id="contadorAsistencias" class="font-extrabold text-primary" style="font-size: 1.2rem;"><?= count($asistenciasSesion) ?></span>
+                    <span class="text-muted" style="font-size: 0.85rem;">presentes</span>
                 </div>
             </div>
 
-            <div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <div class="table-responsive table-scroll-container">
+                <table class="table table-hover">
                     <thead>
-                        <tr style="border-bottom: 2px solid var(--borde); color: var(--texto-secundario);">
-                            <th style="padding: 10px 12px;">Hora</th>
-                            <th style="padding: 10px 12px;">Código</th>
-                            <th style="padding: 10px 12px;">Estudiante</th>
-                            <th style="padding: 10px 12px;">Carrera</th>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Codigo</th>
+                            <th>Estudiante</th>
+                            <th>Carrera</th>
                         </tr>
                     </thead>
                     <tbody id="tablaAsistenciasCuerpo">
                         <?php if (empty($asistenciasSesion)): ?>
                             <tr id="filaVacia">
-                                <td colspan="4" style="text-align: center; padding: 30px; color: var(--texto-secundario);">
-                                    Esperando que los estudiantes escaneen el código QR...
+                                <td colspan="4" class="table-empty">
+                                    Esperando que los estudiantes escaneen el codigo QR...
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($asistenciasSesion as $asist): ?>
-                                <tr style="border-bottom: 1px solid var(--borde);">
-                                    <td style="padding: 10px 12px; font-weight: 600; color: var(--azul-marino);"><?= htmlspecialchars($asist['hora']) ?></td>
-                                    <td style="padding: 10px 12px; font-family: monospace; font-weight: 700;"><?= htmlspecialchars($asist['codigo']) ?></td>
-                                    <td style="padding: 10px 12px;"><?= htmlspecialchars($asist['nombre'] . ' ' . $asist['apellido']) ?></td>
-                                    <td style="padding: 10px 12px; color: var(--texto-secundario);"><?= htmlspecialchars($asist['carrera']) ?></td>
+                                <tr>
+                                    <td class="font-semibold text-primary"><?= htmlspecialchars($asist['hora']) ?></td>
+                                    <td class="table-code"><?= htmlspecialchars($asist['codigo']) ?></td>
+                                    <td class="font-medium"><?= htmlspecialchars($asist['nombre'] . ' ' . $asist['apellido']) ?></td>
+                                    <td class="text-muted"><?= htmlspecialchars($asist['carrera']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -127,10 +142,10 @@ require dirname(__DIR__) . '/layouts/header.php';
 
         async function actualizarAsistencias() {
             try {
-                liveIndicator.style.opacity = '0.3';
+                if (liveIndicator) liveIndicator.style.opacity = '0.3';
                 const resp = await fetch(urlApi);
                 const data = await resp.json();
-                liveIndicator.style.opacity = '1';
+                if (liveIndicator) liveIndicator.style.opacity = '1';
 
                 if (data.success && data.activa) {
                     contador.textContent = data.asistencias.length;
@@ -138,19 +153,19 @@ require dirname(__DIR__) . '/layouts/header.php';
                     if (data.asistencias.length === 0) {
                         tbody.innerHTML = `
                             <tr id="filaVacia">
-                                <td colspan="4" style="text-align: center; padding: 30px; color: var(--texto-secundario);">
-                                    Esperando que los estudiantes escaneen el código QR...
+                                <td colspan="4" class="table-empty">
+                                    Esperando que los estudiantes escaneen el codigo QR...
                                 </td>
                             </tr>`;
                         return;
                     }
 
                     tbody.innerHTML = data.asistencias.map(a => `
-                        <tr style="border-bottom: 1px solid var(--borde);">
-                            <td style="padding: 10px 12px; font-weight: 600; color: var(--azul-marino);">${a.hora}</td>
-                            <td style="padding: 10px 12px; font-family: monospace; font-weight: 700;">${a.codigo}</td>
-                            <td style="padding: 10px 12px;">${a.nombre} ${a.apellido}</td>
-                            <td style="padding: 10px 12px; color: var(--texto-secundario);">${a.carrera}</td>
+                        <tr>
+                            <td class="font-semibold text-primary">${a.hora}</td>
+                            <td class="table-code">${a.codigo}</td>
+                            <td class="font-medium">${a.nombre} ${a.apellido}</td>
+                            <td class="text-muted">${a.carrera}</td>
                         </tr>
                     `).join('');
                 } else if (!data.activa) {
@@ -165,26 +180,30 @@ require dirname(__DIR__) . '/layouts/header.php';
     })();
     </script>
 <?php else: ?>
-    <!-- FORMULARIO PARA CREAR NUEVA SESIÓN -->
-    <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); max-width: 650px; margin: 0 auto 36px; border-top: 5px solid var(--azul-marino);">
-        <h2 style="color: var(--azul-marino); font-size: 1.4rem; margin-bottom: 6px;">Iniciar Nueva Sesión de Clase</h2>
-        <p style="color: var(--texto-secundario); font-size: 0.9rem; margin-bottom: 24px;">Configura la materia y nivel para generar el código QR que mostrarás a los estudiantes.</p>
+    <!-- FORMULARIO PARA CREAR NUEVA SESION -->
+    <div class="card content-medium mb-6">
+        <h2 class="text-primary font-bold mb-2" style="font-size: 1.45rem;">
+            Iniciar Nueva Sesion de Clase
+        </h2>
+        <p class="text-muted mb-6" style="font-size: 0.92rem;">
+            Configura la materia y nivel para generar el codigo QR que mostraras a los estudiantes.
+        </p>
 
         <form action="<?= $base ?>/dashboard/sesion/crear" method="POST">
-            <div style="margin-bottom: 18px;">
-                <label for="carrera" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px;">Carrera</label>
-                <select id="carrera" name="carrera" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem;">
+            <div class="form-group">
+                <label for="carrera" class="form-label">Carrera</label>
+                <select id="carrera" name="carrera" class="form-select" required>
                     <option value="">-- Seleccionar Carrera --</option>
                     <option value="Desarrollo de Software">Desarrollo de Software</option>
-                    <option value="Mecánica Automotriz">Mecánica Automotriz</option>
+                    <option value="Mecanica Automotriz">Mecanica Automotriz</option>
                     <option value="Entrenamiento Deportivo">Entrenamiento Deportivo</option>
-                    <option value="Educación Inicial">Educación Inicial</option>
+                    <option value="Educacion Inicial">Educacion Inicial</option>
                 </select>
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label for="nivel" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px;">Nivel / Semestre</label>
-                <select id="nivel" name="nivel" required style="width: 100%; padding: 10px 14px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem;">
+            <div class="form-group">
+                <label for="nivel" class="form-label">Nivel / Semestre</label>
+                <select id="nivel" name="nivel" class="form-select" required>
                     <option value="">-- Seleccionar Nivel --</option>
                     <option value="Primer Nivel">Primer Nivel</option>
                     <option value="Segundo Nivel">Segundo Nivel</option>
@@ -194,59 +213,67 @@ require dirname(__DIR__) . '/layouts/header.php';
                 </select>
             </div>
 
-            <div style="margin-bottom: 24px;">
-                <label for="materia" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px;">Nombre de la Materia</label>
-                <input type="text" id="materia" name="materia" required placeholder="Ej: Programación Web II, Redes, etc."
-                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem;">
+            <div class="form-group mb-6">
+                <label for="materia" class="form-label">Nombre de la Materia</label>
+                <input type="text" id="materia" name="materia" class="form-control" required placeholder="Ej: Programacion Web II, Redes, etc.">
+                
+                <div class="mt-2">
+                    <span class="text-muted" style="font-size: 0.8rem; font-weight: 600;">Sugerencias de materias para esta carrera:</span>
+                    <div id="chipsMaterias" class="chips-container">
+                        <!-- Llenado dinámicamente por JS -->
+                    </div>
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-dorado" style="width: 100%; padding: 12px; font-size: 1rem;">
-                Generar Código QR de Asistencia
+            <button type="submit" class="btn btn-dorado btn-block btn-lg">
+                Generar Codigo QR de Asistencia
             </button>
         </form>
     </div>
 <?php endif; ?>
 
 <!-- HISTORIAL DE SESIONES RECIENTES -->
-<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-    <h3 style="color: var(--azul-marino); font-size: 1.15rem; font-weight: 700; margin-bottom: 16px;">Historial de Sesiones Recientes</h3>
+<div class="card">
+    <h3 class="text-primary font-bold mb-4" style="font-size: 1.2rem;">
+        Historial de Sesiones Recientes
+    </h3>
     
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+    <div class="table-responsive">
+        <table class="table table-hover">
             <thead>
-                <tr style="border-bottom: 2px solid var(--borde); color: var(--texto-secundario);">
-                    <th style="padding: 10px 12px;">Fecha</th>
-                    <th style="padding: 10px 12px;">Código</th>
-                    <th style="padding: 10px 12px;">Materia</th>
-                    <th style="padding: 10px 12px;">Horario</th>
-                    <th style="padding: 10px 12px;">Estado</th>
-                    <th style="padding: 10px 12px; text-align: right;">Total Asistentes</th>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Codigo</th>
+                    <th>Materia</th>
+                    <th>Horario</th>
+                    <th>Estado</th>
+                    <th class="text-right">Total Asistentes</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($historial)): ?>
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 24px; color: var(--texto-secundario);">
-                            No hay sesiones registradas todavía.
+                        <td colspan="6" class="table-empty">
+                            No hay sesiones registradas todavia.
                         </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($historial as $h): ?>
-                        <tr style="border-bottom: 1px solid var(--borde);">
-                            <td style="padding: 10px 12px; font-weight: 600;"><?= htmlspecialchars($h['fecha']) ?></td>
-                            <td style="padding: 10px 12px; font-family: monospace; font-weight: 700;"><?= htmlspecialchars($h['codigo_sesion']) ?></td>
-                            <td style="padding: 10px 12px;"><?= htmlspecialchars($h['materia']) ?></td>
-                            <td style="padding: 10px 12px; color: var(--texto-secundario);">
+                        <tr>
+                            <td class="font-semibold"><?= htmlspecialchars($h['fecha']) ?></td>
+                            <td class="table-code"><?= htmlspecialchars($h['codigo_sesion']) ?></td>
+                            <td><?= htmlspecialchars($h['materia']) ?></td>
+                            <td class="text-muted">
                                 <?= htmlspecialchars($h['hora_inicio']) ?> - <?= htmlspecialchars($h['hora_fin'] ?? 'Activa') ?>
                             </td>
-                            <td style="padding: 10px 12px;">
+                            <td>
                                 <?php if ($h['activa']): ?>
-                                    <span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 700;">ACTIVA</span>
+                                    <span class="badge badge-success">ACTIVA</span>
                                 <?php else: ?>
-                                    <span style="background: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">FINALIZADA</span>
+                                    <span class="badge badge-neutral">FINALIZADA</span>
                                 <?php endif; ?>
                             </td>
-                            <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: var(--azul-marino);">
+                            <td class="text-right font-bold text-primary">
                                 <?= $h['total_asistencias'] ?>
                             </td>
                         </tr>
@@ -256,5 +283,130 @@ require dirname(__DIR__) . '/layouts/header.php';
         </table>
     </div>
 </div>
+
+<?php if ($sesionActiva): ?>
+<!-- MODAL MODO PROYECTOR (QR PANTALLA COMPLETA) -->
+<div id="modalProyector" class="modal-proyector-overlay">
+    <div class="modal-proyector-card">
+        <button type="button" onclick="cerrarProyector()" class="modal-proyector-close" title="Cerrar">&times;</button>
+        <span class="badge badge-info pulse-badge mb-2">SESIÓN ACTIVA — ESCANEO QR</span>
+        <h2 class="text-primary font-black" style="font-size: 1.8rem; margin: 8px 0 4px;">
+            <?= htmlspecialchars($sesionActiva['materia']) ?>
+        </h2>
+        <p class="text-muted font-medium mb-2" style="font-size: 0.95rem;">
+            Escanea el código QR con la cámara de tu teléfono móvil
+        </p>
+        <img src="<?= $qrUrl ?>" alt="Código QR en Grande" class="qr-proyector-img">
+        <div class="access-code-box mt-3" style="max-width: 320px; margin-left: auto; margin-right: auto; padding: 12px 16px;">
+            <span class="access-code-title">Código Manual de Acceso:</span>
+            <strong style="font-size: 2.1rem; letter-spacing: 4px; color: var(--color-primary); display: block; font-family: monospace;">
+                <?= htmlspecialchars($sesionActiva['codigo_sesion']) ?>
+            </strong>
+        </div>
+        <p class="text-muted mt-4 mb-0" style="font-size: 0.82rem;">
+            Presiona <kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold;">ESC</kbd> o haz clic fuera para salir del proyector.
+        </p>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Toast de Notificación Flotante -->
+<div id="toastApp" class="toast-msg">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastTexto">Mensaje</span>
+</div>
+
+<script>
+// Funcionalidades Interactivas del Dashboard
+function abrirProyector() {
+    const modal = document.getElementById('modalProyector');
+    if (modal) modal.style.display = 'flex';
+}
+
+function cerrarProyector() {
+    const modal = document.getElementById('modalProyector');
+    if (modal) modal.style.display = 'none';
+}
+
+function mostrarToast(mensaje) {
+    const toast = document.getElementById('toastApp');
+    const texto = document.getElementById('toastTexto');
+    if (toast && texto) {
+        texto.textContent = mensaje;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+}
+
+function copiarEnlaceDirecto(url) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(() => {
+            mostrarToast('¡Enlace de asistencia copiado al portapapeles!');
+        }).catch(() => fallbackCopiar(url));
+    } else {
+        fallbackCopiar(url);
+    }
+}
+
+function fallbackCopiar(texto) {
+    const input = document.createElement('input');
+    input.value = texto;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    mostrarToast('¡Enlace de asistencia copiado al portapapeles!');
+}
+
+// Cerrar modal al hacer clic en fondo o con ESC
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('modalProyector');
+    if (e.target === modal) cerrarProyector();
+});
+
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarProyector();
+});
+
+// Sugerencias Dinámicas de Materias
+const catalogoMaterias = {
+    "Desarrollo de Software": ["Programación Web II", "Bases de Datos Avanzadas", "Estructuras de Datos", "Ingeniería de Software", "Redes y Servidores"],
+    "Mecanica Automotriz": ["Motores de Combustión", "Electrónica Automotriz", "Sistemas de Frenos", "Diagnóstico Computarizado"],
+    "Entrenamiento Deportivo": ["Fisiología del Ejercicio", "Planificación Deportiva", "Metodología del Entrenamiento", "Preparación Física"],
+    "Educacion Inicial": ["Desarrollo Infantil", "Expresión Corporal y Lúdica", "Didáctica de la Educación", "Estimulación Temprana"]
+};
+
+const selectCarrera = document.getElementById('carrera');
+const contChips = document.getElementById('chipsMaterias');
+const inputMateria = document.getElementById('materia');
+
+function actualizarChipsMaterias() {
+    if (!selectCarrera || !contChips) return;
+    const seleccion = selectCarrera.value;
+    contChips.innerHTML = '';
+    const lista = catalogoMaterias[seleccion] || ["Tutoría Académica", "Proyecto Integrador", "Clase Magistral"];
+    
+    lista.forEach(m => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chip-btn';
+        btn.textContent = '+ ' + m;
+        btn.onclick = () => {
+            if (inputMateria) {
+                inputMateria.value = m;
+                inputMateria.focus();
+            }
+        };
+        contChips.appendChild(btn);
+    });
+}
+
+if (selectCarrera) {
+    selectCarrera.addEventListener('change', actualizarChipsMaterias);
+    actualizarChipsMaterias();
+}
+</script>
 
 <?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

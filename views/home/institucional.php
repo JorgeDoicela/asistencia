@@ -3,42 +3,57 @@ $titulo = 'Institucional - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
-<div style="max-width: 900px; margin: 20px auto;">
-    <div style="margin-bottom: 24px;">
-        <a href="<?= $base ?>/" class="btn btn-outline">&larr; Volver al Inicio</a>
+<div class="content-medium">
+    <nav class="breadcrumb">
+        <a href="<?= $base ?>/">Inicio</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Información Institucional</span>
+    </nav>
+
+    <div class="mb-4">
+        <a href="<?= $base ?>/" class="btn btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Volver al Inicio
+        </a>
     </div>
 
-    <div style="background: white; border-radius: 12px; padding: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <h1 style="color: var(--azul-marino); font-size: 2rem; margin-bottom: 8px;">Instituto Superior Tecnológico Mayor Pedro Traversari</h1>
-        <p style="color: var(--dorado); font-weight: 700; margin-bottom: 24px; font-size: 1.05rem;">Formando profesionales técnicos y tecnológicos de excelencia</p>
+    <div class="card">
+        <h1 class="page-title mb-4">Instituto Superior Tecnologico Mayor Pedro Traversari</h1>
+        <p class="text-gold font-bold mb-6" style="font-size: 1.05rem;">
+            Formando profesionales tecnicos y tecnologicos de excelencia
+        </p>
 
-        <section style="margin-bottom: 30px;">
-            <h2 style="color: var(--azul-marino); font-size: 1.3rem; margin-bottom: 12px; border-bottom: 2px solid var(--fondo); padding-bottom: 6px;">Nuestra Oferta Académica</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 16px;">
-                <div style="padding: 16px; background: var(--fondo); border-radius: 8px; border-left: 4px solid var(--azul-marino);">
-                    <h3 style="color: var(--azul-marino); font-size: 1.05rem; margin-bottom: 4px;">Desarrollo de Software</h3>
-                    <p style="color: var(--texto-secundario); font-size: 0.88rem;">Construcción de aplicaciones web, móviles y sistemas corporativos con estándares modernos.</p>
+        <section class="mb-6">
+            <h2 class="text-primary font-bold mb-4" style="font-size: 1.25rem; border-bottom: 2px solid var(--color-border); padding-bottom: 8px;">
+                Nuestra Oferta Academica
+            </h2>
+            <div class="careers-grid">
+                <div class="career-card">
+                    <h3 class="career-title">Desarrollo de Software</h3>
+                    <p class="career-desc">Construccion de aplicaciones web, moviles y sistemas corporativos con estandares modernos.</p>
                 </div>
-                <div style="padding: 16px; background: var(--fondo); border-radius: 8px; border-left: 4px solid var(--dorado);">
-                    <h3 style="color: var(--azul-marino); font-size: 1.05rem; margin-bottom: 4px;">Mecánica Automotriz</h3>
-                    <p style="color: var(--texto-secundario); font-size: 0.88rem;">Diagnóstico electrónico, electromovilidad y mantenimiento automotriz integral.</p>
+                <div class="career-card">
+                    <h3 class="career-title">Mecanica Automotriz</h3>
+                    <p class="career-desc">Diagnostico electronico, electromovilidad y mantenimiento automotriz integral.</p>
                 </div>
-                <div style="padding: 16px; background: var(--fondo); border-radius: 8px; border-left: 4px solid var(--info);">
-                    <h3 style="color: var(--azul-marino); font-size: 1.05rem; margin-bottom: 4px;">Entrenamiento Deportivo</h3>
-                    <p style="color: var(--texto-secundario); font-size: 0.88rem;">Preparación física de alto rendimiento, fisiología y gestión de eventos deportivos.</p>
+                <div class="career-card">
+                    <h3 class="career-title">Entrenamiento Deportivo</h3>
+                    <p class="career-desc">Preparacion fisica de alto rendimiento, fisiologia y gestion de eventos deportivos.</p>
                 </div>
-                <div style="padding: 16px; background: var(--fondo); border-radius: 8px; border-left: 4px solid var(--exito);">
-                    <h3 style="color: var(--azul-marino); font-size: 1.05rem; margin-bottom: 4px;">Educación Inicial</h3>
-                    <p style="color: var(--texto-secundario); font-size: 0.88rem;">Pedagogía innovadora, desarrollo infantil temprano y estimulación integral.</p>
+                <div class="career-card">
+                    <h3 class="career-title">Educacion Inicial</h3>
+                    <p class="career-desc">Pedagogia innovadora, desarrollo infantil temprano y estimulacion integral.</p>
                 </div>
             </div>
         </section>
 
         <section>
-            <h2 style="color: var(--azul-marino); font-size: 1.3rem; margin-bottom: 12px; border-bottom: 2px solid var(--fondo); padding-bottom: 6px;">Ubicación y Contacto</h2>
-            <p style="color: var(--texto-secundario); font-size: 0.95rem; line-height: 1.6;">
+            <h2 class="text-primary font-bold mb-4" style="font-size: 1.25rem; border-bottom: 2px solid var(--color-border); padding-bottom: 8px;">
+                Ubicacion y Contacto
+            </h2>
+            <p class="text-muted" style="font-size: 0.95rem; line-height: 1.6;">
                 Av. Maldonado y Calle Mayor Pedro Traversari, Quito - Ecuador.<br>
-                Teléfonos de atención institucional: (+593) 2 300-1234 &bull; Email: info@istpet.edu.ec
+                Telefonos de atencion institucional: (+593) 2 300-1234 &bull; Email: info@istpet.edu.ec
             </p>
         </section>
     </div>

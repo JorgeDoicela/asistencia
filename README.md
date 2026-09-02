@@ -24,19 +24,22 @@ asistencia/
 │   ├── DashboardController.php # Panel de control en vivo y generador QR
 │   ├── EstudianteController.php# Administracion de alumnos y portal estudiantil
 │   ├── AsistenciaController.php# Confirmacion del QR y API de tiempo real
-│   └── ReporteController.php   # Filtros de fecha y descarga en Excel (CSV)
+│   └── ReporteController.php   # Filtros y exportación multiformato (CSV, Excel, PDF)
+├── libs/                       # BIBLIOTECAS: Motor FPDF y reporte institucional
+│   ├── ReportePdf.php          # Clase personalizada con membrete ISTPET y tabla A4
+│   └── fpdf/                   # FPDF 1.86 autónomo (sin dependencias Composer)
 ├── views/                      # VISTAS: Pantallas con HTML y datos
 │   ├── layouts/                # Encabezado (header.php) y pie de pagina (footer.php)
 │   ├── auth/                   # Formularios de acceso
 │   ├── dashboard/              # Panel del docente con tabla en vivo
 │   ├── estudiantes/            # Listado, nuevo alumno y portal del estudiante
 │   ├── asistencia/             # Confirmacion de escaneo del QR
-│   ├── reportes/               # Tabla con filtros y boton de descarga
+│   ├── reportes/               # Tabla con filtros y botones de descarga (CSV, Excel, PDF)
 │   └── errors/                 # Pagina 404
 ├── public/                     # Carpeta publica accesible desde el navegador
 │   ├── index.php               # Front Controller (enrutador con switch/case)
 │   ├── .htaccess               # Enrutamiento de URLs amigables
-│   └── assets/                 # Hojas de estilo CSS y scripts JS
+│   └── assets/                 # Hojas de estilo CSS, scripts JS e imágenes
 ├── database/                   # Script de creacion y datos de prueba
 │   └── database.sql
 ├── docs/                       # Documentacion tecnica y manuales
@@ -68,6 +71,12 @@ docker compose up -d --build
 * **Aplicacion:** http://localhost:8080/
 * **phpMyAdmin:** http://localhost:8081/
 
+### Ejecutar Pruebas Automatizadas (Tests)
+Para ejecutar la suite de pruebas unitarias y de integracion:
+```bash
+docker compose exec web php tests/test_runner.php
+```
+
 ### Opcion 2: Con XAMPP
 1. Copia la carpeta `asistencia` dentro de `C:\xampp\htdocs\`.
 2. Importa el archivo `database/database.sql` en phpMyAdmin (`asistencia_qr`).
@@ -92,6 +101,8 @@ docker compose up -d --build
 
 En la carpeta [`docs/`](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/) encontraras guias para exponer y defender el proyecto:
 * [docs/arquitectura.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/arquitectura.md): Explicacion del patron MVC pedagogico.
+* [docs/diseno_ux_ui_y_flujos.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/diseno_ux_ui_y_flujos.md): Diseño UX/UI, modo proyector para aulas, flujos de navegación contextual y adaptabilidad móvil.
+* [docs/modulo_reportes_y_exportacion.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/modulo_reportes_y_exportacion.md): Especificación del módulo de reportes y exportaciones en CSV, Excel y PDF.
 * [docs/base_de_datos.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/base_de_datos.md): Tablas y relaciones.
 * [docs/api_y_rutas.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/api_y_rutas.md): Rutas y API JSON.
 * [docs/manual_usuario.md](file:///c:/Users/DESARROLLADOR/Desktop/Proyectos/asistencia/docs/manual_usuario.md): Manual paso a paso.

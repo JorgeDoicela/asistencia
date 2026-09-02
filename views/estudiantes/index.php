@@ -1,16 +1,28 @@
 <?php
-$titulo = 'Gestión de Estudiantes - ISTPET';
+$titulo = 'Gestion de Estudiantes - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
-<div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+<nav class="breadcrumb">
+    <a href="<?= $base ?>/dashboard">Panel Docente</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Gestión de Estudiantes</span>
+</nav>
+
+<div class="page-header">
     <div>
-        <h1 style="color: var(--azul-marino); font-size: 1.8rem; font-weight: 800;">Gestión de Estudiantes</h1>
-        <p style="color: var(--texto-secundario); font-size: 0.95rem;">Total de estudiantes registrados: <strong><?= $total ?></strong></p>
+        <h1 class="page-title">Gestión de Estudiantes</h1>
+        <p class="page-subtitle">Total de estudiantes registrados: <strong><?= $total ?></strong></p>
     </div>
-    <button onclick="abrirModalCrear()" class="btn btn-primary">
-        + Registrar Nuevo Estudiante
-    </button>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="<?= $base ?>/dashboard" class="btn btn-back" title="Regresar al panel principal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Volver al Panel QR
+        </a>
+        <button onclick="abrirModalCrear()" class="btn btn-primary">
+            + Registrar Nuevo Estudiante
+        </button>
+    </div>
 </div>
 
 <?php if (!empty($mensaje)): ?>
@@ -25,58 +37,65 @@ require dirname(__DIR__) . '/layouts/header.php';
     </div>
 <?php endif; ?>
 
-<!-- Barra de Búsqueda -->
-<div style="background: white; border-radius: 10px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); margin-bottom: 24px;">
-    <form method="GET" action="<?= $base ?>/estudiantes" style="display: flex; gap: 12px; flex-wrap: wrap;">
+<!-- Barra de Busqueda -->
+<div class="card card-filter mb-6">
+    <form method="GET" action="<?= $base ?>/estudiantes" class="search-bar-form">
         <input type="text" name="buscar" value="<?= htmlspecialchars($busqueda) ?>"
-               placeholder="Buscar por código, nombres o carrera..."
-               style="flex: 1; min-width: 260px; padding: 10px 14px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem;">
+               placeholder="Buscar por codigo, nombres o carrera..."
+               class="form-control search-bar-input">
         <button type="submit" class="btn btn-primary">Buscar</button>
         <?php if (!empty($busqueda)): ?>
             <a href="<?= $base ?>/estudiantes" class="btn btn-outline">Limpiar Filtro</a>
         <?php endif; ?>
     </form>
+
+    <?php if (!empty($busqueda)): ?>
+        <div class="mt-3 pt-2 d-flex align-center gap-2" style="border-top: 1px dashed var(--color-border);">
+            <span class="text-muted" style="font-size: 0.85rem;">Resultados para:</span>
+            <span class="filter-pill">"<?= htmlspecialchars($busqueda) ?>"</span>
+            <span class="text-muted" style="font-size: 0.82rem;">(<?= count($estudiantes) ?> encontrados)</span>
+            <a href="<?= $base ?>/estudiantes" class="text-danger font-medium" style="font-size: 0.82rem; text-decoration: underline; margin-left: 4px;">Restablecer lista</a>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Tabla de Estudiantes -->
-<div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover">
             <thead>
-                <tr style="border-bottom: 2px solid var(--borde); color: var(--texto-secundario);">
-                    <th style="padding: 12px;">Código</th>
-                    <th style="padding: 12px;">Nombres</th>
-                    <th style="padding: 12px;">Apellidos</th>
-                    <th style="padding: 12px;">Carrera</th>
-                    <th style="padding: 12px; text-align: right;">Acciones</th>
+                <tr>
+                    <th>Codigo</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Carrera</th>
+                    <th class="text-right">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($estudiantes)): ?>
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px; color: var(--texto-secundario);">
-                            No se encontraron estudiantes registrados.
+                        <td colspan="5" class="table-empty">
+                            No se encontraron estudiantes registrados<?= !empty($busqueda) ? ' con el término buscado' : '' ?>.
                         </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($estudiantes as $e): ?>
-                        <tr style="border-bottom: 1px solid var(--borde);">
-                            <td style="padding: 12px; font-family: monospace; font-weight: 700; color: var(--azul-marino);">
-                                <?= htmlspecialchars($e['codigo']) ?>
-                            </td>
-                            <td style="padding: 12px; font-weight: 500;"><?= htmlspecialchars($e['nombre']) ?></td>
-                            <td style="padding: 12px; font-weight: 500;"><?= htmlspecialchars($e['apellido'] ?? '') ?></td>
-                            <td style="padding: 12px; color: var(--texto-secundario);"><?= htmlspecialchars($e['carrera'] ?? '') ?></td>
-                            <td style="padding: 12px; text-align: right;">
+                        <tr>
+                            <td class="table-code"><?= htmlspecialchars($e['codigo']) ?></td>
+                            <td class="font-medium"><?= htmlspecialchars($e['nombre']) ?></td>
+                            <td class="font-medium"><?= htmlspecialchars($e['apellido'] ?? '') ?></td>
+                            <td class="text-muted"><?= htmlspecialchars($e['carrera'] ?? '') ?></td>
+                            <td class="text-right">
                                 <button type="button" 
                                         onclick="abrirModalEditar(<?= htmlspecialchars(json_encode($e)) ?>)"
-                                        class="btn btn-outline" style="padding: 6px 12px; font-size: 0.82rem; margin-right: 6px;">
+                                        class="btn btn-outline btn-sm">
                                     Editar
                                 </button>
-                                <form method="POST" action="<?= $base ?>/estudiantes/eliminar" style="display: inline-block;"
-                                      onsubmit="return confirm('¿Seguro que desea eliminar al estudiante <?= htmlspecialchars($e['nombre']) ?>? Esta acción no se puede deshacer.');">
+                                <form method="POST" action="<?= $base ?>/estudiantes/eliminar" style="display: inline-block; margin-left: 4px;"
+                                      onsubmit="return confirm('Seguro que desea eliminar al estudiante <?= htmlspecialchars($e['nombre']) ?>?');">
                                     <input type="hidden" name="id" value="<?= $e['id'] ?>">
-                                    <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.82rem;">
+                                    <button type="submit" class="btn btn-danger btn-sm">
                                         Eliminar
                                     </button>
                                 </form>
@@ -90,43 +109,46 @@ require dirname(__DIR__) . '/layouts/header.php';
 </div>
 
 <!-- MODAL CREAR / EDITAR ESTUDIANTE -->
-<div id="modalEstudiante" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 30px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-        <h3 id="modalTitulo" style="color: var(--azul-marino); margin-bottom: 18px; font-size: 1.3rem;">Nuevo Estudiante</h3>
+<div id="modalEstudiante" class="modal-overlay">
+    <div class="modal-content">
+        <div class="d-flex justify-content-between align-center mb-4" style="border-bottom: 1px solid var(--color-border); padding-bottom: 12px;">
+            <h3 id="modalTitulo" class="modal-title mb-0" style="font-size: 1.25rem;">Nuevo Estudiante</h3>
+            <button type="button" onclick="cerrarModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; line-height: 1;" title="Cerrar modal">&times;</button>
+        </div>
         
         <form id="formEstudiante" method="POST" action="<?= $base ?>/estudiantes/crear">
             <input type="hidden" id="estudiante_id" name="id" value="">
 
-            <div style="margin-bottom: 14px;">
-                <label for="modal_codigo" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Código Único</label>
+            <div class="form-group">
+                <label for="modal_codigo" class="form-label">Codigo Unico</label>
                 <input type="text" id="modal_codigo" name="codigo" required placeholder="Ej: EST009"
-                       style="width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 6px; font-family: monospace; font-weight: 700; text-transform: uppercase;">
+                       class="form-control form-control-code">
             </div>
 
-            <div style="margin-bottom: 14px;">
-                <label for="modal_nombre" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Nombres</label>
+            <div class="form-group">
+                <label for="modal_nombre" class="form-label">Nombres</label>
                 <input type="text" id="modal_nombre" name="nombre" required placeholder="Nombres del estudiante"
-                       style="width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 6px;">
+                       class="form-control">
             </div>
 
-            <div style="margin-bottom: 14px;">
-                <label for="modal_apellido" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Apellidos</label>
+            <div class="form-group">
+                <label for="modal_apellido" class="form-label">Apellidos</label>
                 <input type="text" id="modal_apellido" name="apellido" required placeholder="Apellidos del estudiante"
-                       style="width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 6px;">
+                       class="form-control">
             </div>
 
-            <div style="margin-bottom: 22px;">
-                <label for="modal_carrera" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Carrera</label>
-                <select id="modal_carrera" name="carrera" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 6px;">
+            <div class="form-group mb-6">
+                <label for="modal_carrera" class="form-label">Carrera</label>
+                <select id="modal_carrera" name="carrera" class="form-select" required>
                     <option value="">-- Seleccione Carrera --</option>
                     <option value="Desarrollo de Software">Desarrollo de Software</option>
-                    <option value="Mecánica Automotriz">Mecánica Automotriz</option>
+                    <option value="Mecanica Automotriz">Mecanica Automotriz</option>
                     <option value="Entrenamiento Deportivo">Entrenamiento Deportivo</option>
-                    <option value="Educación Inicial">Educación Inicial</option>
+                    <option value="Educacion Inicial">Educacion Inicial</option>
                 </select>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <div class="modal-actions">
                 <button type="button" onclick="cerrarModal()" class="btn btn-outline">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar Estudiante</button>
             </div>
@@ -153,6 +175,7 @@ function abrirModalCrear() {
     apellidoInput.value = '';
     carreraInput.value = '';
     modal.style.display = 'flex';
+    setTimeout(() => codigoInput.focus(), 60);
 }
 
 function abrirModalEditar(estudiante) {
@@ -164,17 +187,24 @@ function abrirModalEditar(estudiante) {
     apellidoInput.value = estudiante.apellido || '';
     carreraInput.value = estudiante.carrera || '';
     modal.style.display = 'flex';
+    setTimeout(() => nombreInput.focus(), 60);
 }
 
 function cerrarModal() {
     modal.style.display = 'none';
 }
 
-window.onclick = function(event) {
+window.addEventListener('click', function(event) {
     if (event.target === modal) {
         cerrarModal();
     }
-}
+});
+
+window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && modal.style.display === 'flex') {
+        cerrarModal();
+    }
+});
 </script>
 
 <?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

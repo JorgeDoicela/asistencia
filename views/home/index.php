@@ -1,62 +1,106 @@
 <?php
-$titulo = 'Bienvenido - Sistema de Asistencia ISTPET';
+$titulo = 'Sistema de Asistencia QR - ISTPET';
+$bodyClass = 'home-layout';
+$ocultarNavbar = true;
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
-<div style="max-width: 800px; margin: 40px auto; text-align: center;">
-    <div style="display: inline-block; background: var(--azul-marino); padding: 12px 24px; border-radius: 50px; margin-bottom: 20px;">
-        <span style="color: var(--dorado); font-weight: 700; font-size: 0.95rem; letter-spacing: 1px;">ISTPET DIGITAL</span>
-    </div>
-    <h1 style="font-size: 2.4rem; color: var(--azul-marino); margin-bottom: 12px; font-weight: 800;">Sistema de Control de Asistencia QR</h1>
-    <p style="color: var(--texto-secundario); font-size: 1.1rem; max-width: 620px; margin: 0 auto 36px;">
-        Plataforma institucional para el registro y monitoreo en tiempo real de asistencia académica.
-    </p>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; text-align: left;">
-        <!-- Tarjeta Docente -->
-        <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 5px solid var(--azul-marino); display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <h3 style="color: var(--azul-marino); margin-bottom: 10px; font-size: 1.25rem;">Panel Docente</h3>
-                <p style="color: var(--texto-secundario); font-size: 0.92rem; margin-bottom: 20px;">
-                    Inicia sesión para generar códigos QR de clase, monitorear asistencias en vivo y generar reportes.
-                </p>
+<div class="home-wrapper">
+    <div class="home-container">
+        <!-- Encabezado con Logo Oficial -->
+        <div class="home-header">
+            <div class="home-logo-box">
+                <img src="<?= $base ?>/assets/img/logo-istpet.jpg" alt="Logo ISTPET">
             </div>
-            <a href="<?= $base ?>/login" class="btn btn-primary" style="width: 100%;">
-                Acceso Docente &rarr;
-            </a>
+            <h1 class="home-title">Sistema de Asistencia QR</h1>
+            <p class="home-subtitle">Instituto Superior Tecnológico Mayor Pedro Traversari</p>
         </div>
 
-        <!-- Tarjeta Estudiante -->
-        <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 5px solid var(--dorado); display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <h3 style="color: var(--azul-marino); margin-bottom: 10px; font-size: 1.25rem;">Portal Estudiante</h3>
-                <p style="color: var(--texto-secundario); font-size: 0.92rem; margin-bottom: 20px;">
-                    Consulta tu historial académico de asistencias registradas con tu código de estudiante.
+        <?php if (!empty($_SESSION['docente_id'])): ?>
+            <!-- Banner de Continuación Rápida para Docentes Autenticados -->
+            <div class="card mb-6 text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; border: 1px solid #334155; padding: 22px;">
+                <span class="badge badge-info pulse-badge mb-2">SESIÓN DOCENTE ACTIVA</span>
+                <h3 style="color: #ffffff; font-size: 1.25rem; margin-bottom: 6px;">
+                    Bienvenido de vuelta, <?= htmlspecialchars($_SESSION['docente_nombre'] ?? 'Docente') ?>
+                </h3>
+                <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 16px;">
+                    Tu sesión está lista. Puedes ingresar directo a proyectar clases o gestionar asistencias.
                 </p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="<?= $base ?>/dashboard" class="btn btn-dorado btn-lg">
+                        Ir a Mi Panel de Control QR &rarr;
+                    </a>
+                    <a href="<?= $base ?>/logout" class="btn btn-outline" style="color: #cbd5e1; border-color: #475569;">
+                        Cerrar Sesión
+                    </a>
+                </div>
             </div>
-            <a href="<?= $base ?>/login-estudiante" class="btn btn-dorado" style="width: 100%;">
-                Consultar Mis Asistencias &rarr;
-            </a>
+        <?php elseif (!empty($_SESSION['estudiante_id'])): ?>
+            <!-- Banner de Continuación Rápida para Estudiantes Autenticados -->
+            <div class="card mb-6 text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; border: 1px solid #334155; padding: 22px;">
+                <span class="badge badge-success mb-2" style="background: var(--color-accent); color: var(--color-primary-dark);">SESIÓN ESTUDIANTIL ACTIVA</span>
+                <h3 style="color: #ffffff; font-size: 1.25rem; margin-bottom: 6px;">
+                    Hola, <?= htmlspecialchars($_SESSION['estudiante_nombre'] ?? $_SESSION['estudiante_codigo'] ?? 'Estudiante') ?>
+                </h3>
+                <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 16px;">
+                    Accede a tu historial de asistencias o confirma tu clase de hoy.
+                </p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="<?= $base ?>/estudiante/portal" class="btn btn-dorado btn-lg">
+                        Ver Mi Expediente de Asistencias &rarr;
+                    </a>
+                    <a href="<?= $base ?>/asistencia/escanear" class="btn btn-primary">
+                        Registrar Asistencia en Clase
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Las 2 Opciones Principales de los Chicos -->
+        <div class="home-opciones">
+            <!-- Opcion Docentes -->
+            <div class="home-card-role">
+                <div>
+                    <h2>Docentes</h2>
+                    <p>
+                        Accede a tu panel para generar codigos QR de clase en vivo, monitorear asistencias en tiempo real y exportar reportes.
+                    </p>
+                </div>
+                <div class="home-buttons-stack">
+                    <a href="<?= $base ?>/login" class="btn btn-primary btn-lg btn-block">
+                        Iniciar Sesion Docente &rarr;
+                    </a>
+                    <div style="font-size: 0.82rem; color: var(--color-text-muted); padding: 8px 0;">
+                        Panel institucional para profesores
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opcion Estudiantes -->
+            <div class="home-card-role">
+                <div>
+                    <h2>Estudiantes</h2>
+                    <p>
+                        Confirma tu presencia en clase mediante el codigo QR o consulta tu historial academico de asistencias.
+                    </p>
+                </div>
+                <div class="home-buttons-stack">
+                    <a href="<?= $base ?>/asistencia/escanear" class="btn btn-dorado btn-lg btn-block">
+                        Registrar Asistencia &rarr;
+                    </a>
+                    <a href="<?= $base ?>/login-estudiante" class="btn btn-outline btn-block" style="font-size: 0.88rem;">
+                        Consultar Mi Historial
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <!-- Tarjeta Escaneo QR -->
-        <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 5px solid var(--info); display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <h3 style="color: var(--azul-marino); margin-bottom: 10px; font-size: 1.25rem;">Registro Manual / QR</h3>
-                <p style="color: var(--texto-secundario); font-size: 0.92rem; margin-bottom: 20px;">
-                    Ingresa el código de sesión mostrado por tu docente si no puedes escanear el QR directamente.
-                </p>
-            </div>
-            <a href="<?= $base ?>/asistencia/escanear" class="btn btn-outline" style="width: 100%;">
-                Registrar Asistencia &rarr;
+        <!-- Enlace Institucional Oficial que hicieron los chicos -->
+        <div class="home-secondary-links">
+            <a href="<?= $base ?>/institucional">
+                Conocer mas sobre las Carreras y el ISTPET &bull; Informacion Institucional &rarr;
             </a>
         </div>
-    </div>
-
-    <div style="margin-top: 36px;">
-        <a href="<?= $base ?>/institucional" style="color: var(--texto-secundario); text-decoration: none; font-size: 0.9rem; font-weight: 500;">
-            Conocer más sobre las Carreras y el ISTPET &bull; Información Institucional
-        </a>
     </div>
 </div>
 

@@ -3,12 +3,19 @@ $titulo = 'Acceso Docente - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
-<div style="max-width: 440px; margin: 40px auto;">
-    <div style="background: white; border-radius: 12px; padding: 36px 32px; box-shadow: 0 4px 25px rgba(0,0,0,0.08); border-top: 6px solid var(--azul-marino);">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <span style="background: var(--dorado); color: var(--azul-marino); font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; font-weight: 700; letter-spacing: 0.5px;">DOCENTES</span>
-            <h2 style="color: var(--azul-marino); margin-top: 10px; font-size: 1.6rem; font-weight: 700;">Iniciar Sesión</h2>
-            <p style="color: var(--texto-secundario); font-size: 0.9rem; margin-top: 4px;">Ingresa tus credenciales institucionales</p>
+<div class="auth-page-bg">
+    <div class="auth-card">
+        <div class="auth-top-bar">
+            <a href="<?= $base ?>/" class="auth-top-back">
+                &larr; Volver al Inicio
+            </a>
+        </div>
+
+        <!-- Logo Institucional Original -->
+        <div class="auth-logo-wrap">
+            <img src="<?= $base ?>/assets/img/logo-istpet.jpg" alt="Logo ISTPET" class="auth-logo-img">
+            <h2 class="auth-title">Acceso Docentes</h2>
+            <p class="auth-subtitle">Ingresa tus credenciales para administrar tus clases</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -17,32 +24,44 @@ require dirname(__DIR__) . '/layouts/header.php';
             </div>
         <?php endif; ?>
 
+        <!-- Asistente de Credenciales para Evaluacion -->
+        <div class="demo-credentials-box">
+            <div class="demo-credentials-info">
+                <strong>Docente Demo:</strong><br>
+                Usuario: <code>profesor</code> &bull; Clave: <code>12345</code>
+            </div>
+            <button type="button" onclick="cargarDemo()" class="demo-credentials-btn">
+                Autocompletar
+            </button>
+        </div>
+
         <form action="<?= $base ?>/login" method="POST">
-            <div style="margin-bottom: 18px;">
-                <label for="usuario" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--texto-principal); margin-bottom: 6px;">Usuario Docente</label>
-                <input type="text" id="usuario" name="usuario" required autofocus
-                       style="width: 100%; padding: 12px 14px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
-                       placeholder="Ej: profesor o Demo">
+            <div class="form-group">
+                <label for="usuario" class="form-label">Usuario del Docente</label>
+                <input type="text" id="usuario" name="usuario" class="form-control" required autofocus placeholder="Ej: profesor o Demo">
             </div>
 
-            <div style="margin-bottom: 24px;">
-                <label for="password" style="display: block; font-size: 0.88rem; font-weight: 600; color: var(--texto-principal); margin-bottom: 6px;">Contraseña</label>
-                <input type="password" id="password" name="password" required
-                       style="width: 100%; padding: 12px 14px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem; outline: none; transition: border-color 0.2s;"
-                       placeholder="••••••••">
+            <div class="form-group mb-6">
+                <label for="password" class="form-label">Contrasena</label>
+                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">
-                Ingresar al Panel
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                Ingresar al Panel Docente &rarr;
             </button>
         </form>
 
-        <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borde);">
-            <a href="<?= $base ?>/" style="color: var(--texto-secundario); text-decoration: none; font-size: 0.88rem; font-weight: 500;">
-                &larr; Volver a la página principal
-            </a>
+        <div class="auth-footer">
+            <a href="<?= $base ?>/">&larr; Volver al inicio</a>
         </div>
     </div>
 </div>
+
+<script>
+function cargarDemo() {
+    document.getElementById('usuario').value = 'profesor';
+    document.getElementById('password').value = '12345';
+}
+</script>
 
 <?php require dirname(__DIR__) . '/layouts/footer.php'; ?>

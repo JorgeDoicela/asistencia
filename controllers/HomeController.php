@@ -12,6 +12,11 @@ class HomeController extends BaseController
             session_start();
         }
 
+        // Si el docente ya tiene sesion activa, llevarlo directamente al panel
+        if (!empty($_SESSION['docente_id'])) {
+            $this->redireccionar('/dashboard');
+        }
+
         $base = self::obtenerRutaBase();
         $this->vista('home.index', [
             'base' => $base

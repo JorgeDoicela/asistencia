@@ -63,20 +63,25 @@ Reciben las peticiones del usuario y unen a los modelos con las vistas:
 * **`DashboardController.php`:** Controla el panel del docente y el codigo QR en vivo.
 * **`EstudianteController.php`:** Procesa las altas, bajas y cambios de estudiantes.
 * **`AsistenciaController.php`:** Recibe el escaneo del QR, valida que la sesion este activa y guarda la asistencia.
-* **`ReporteController.php`:** Filtra asistencias por fecha y genera la descarga en archivo Excel (CSV).
+* **`ReporteController.php`:** Filtra asistencias por fecha, materia o estudiante, y genera descargas multiformato en CSV, Excel (.xls) y PDF institucional.
 
-### 3.4. `views/`
+### 3.4. `libs/`
+Bibliotecas y utilidades internas sin necesidad de dependencias externas:
+* **`fpdf/`:** Motor FPDF 1.86 puro para la generación de archivos PDF vectoriales sin dependencias de Composer.
+* **`ReportePdf.php`:** Clase personalizada que extiende FPDF para aplicar el membrete oficial del ISTPET, formato apaisado A4, colores corporativos y paginación automática.
+
+### 3.5. `views/`
 Archivos PHP dedicados exclusivamente al diseno visual:
 * **`layouts/header.php` y `footer.php`:** Barra de navegacion superior y pie de pagina compartidos.
 * **`auth/`:** Formularios para iniciar sesion.
 * **`dashboard/`:** Panel del docente con la tarjeta del QR y la tabla en vivo.
 * **`estudiantes/`:** Tabla de alumnos con buscador y ventana modal para agregar nuevos.
 * **`asistencia/`:** Pantalla donde el estudiante confirma su codigo tras escanear el QR.
-* **`reportes/`:** Tabla de filtros con boton de descarga.
+* **`reportes/`:** Tabla de filtros con botones de descarga directa en CSV, Excel y PDF.
 * **`errors/404.php`:** Mensaje amigable si el usuario escribe una ruta inexistente.
 
-### 3.5. `public/`
+### 3.6. `public/`
 La unica carpeta a la que el navegador web tiene acceso directo:
 * **`index.php`:** El archivo principal que recibe cualquier peticion web y mediante una instruccion `switch` llama al controlador adecuado.
 * **`.htaccess`:** Redirige las URLs limpias (sin `.php`) hacia `index.php`.
-* **`assets/`:** Contiene los archivos `css/` y `js/`.
+* **`assets/`:** Contiene los archivos `css/`, `img/` y fuentes.

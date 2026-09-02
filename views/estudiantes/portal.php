@@ -1,58 +1,100 @@
 <?php
-$titulo = 'Mi Portal Académico - ISTPET';
+$titulo = 'Mi Portal Academico - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
 ?>
 
-<div style="max-width: 900px; margin: 20px auto;">
+<div class="content-medium">
+    <nav class="breadcrumb">
+        <a href="<?= $base ?>/">Inicio</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Mi Expediente Académico</span>
+    </nav>
+
     <!-- Encabezado del Estudiante -->
-    <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border-top: 5px solid var(--dorado); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div class="card portal-header-flex mb-6">
         <div>
-            <span style="background: var(--azul-marino); color: var(--dorado); font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; font-weight: 700; letter-spacing: 0.5px;">ESTUDIANTE REGISTRADO</span>
-            <h2 style="color: var(--azul-marino); margin-top: 8px; font-size: 1.6rem;"><?= htmlspecialchars($estudiante['nombre']) ?></h2>
-            <p style="color: var(--texto-secundario); font-size: 0.95rem; margin-top: 4px;">
-                Código: <strong style="color: var(--azul-marino); font-family: monospace; font-size: 1.05rem;"><?= htmlspecialchars($estudiante['codigo']) ?></strong> &bull; 
+            <span class="auth-badge mb-2">ESTUDIANTE REGISTRADO</span>
+            <h2 class="text-primary font-extrabold mt-2" style="font-size: 1.65rem;">
+                <?= htmlspecialchars($estudiante['nombre']) ?>
+            </h2>
+            <p class="text-muted mt-2" style="font-size: 0.95rem;">
+                Codigo: <strong class="table-code"><?= htmlspecialchars($estudiante['codigo']) ?></strong> &bull; 
                 Carrera: <strong><?= htmlspecialchars($estudiante['carrera']) ?></strong>
             </p>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div class="d-flex gap-2">
             <a href="<?= $base ?>/asistencia/escanear" class="btn btn-dorado">Registrar Nueva Asistencia</a>
-            <a href="<?= $base ?>/logout-estudiante" class="btn btn-outline">Cerrar Sesión</a>
+            <a href="<?= $base ?>/logout-estudiante" class="btn btn-outline">Cerrar Sesion</a>
+        </div>
+    </div>
+
+    <?php
+    $totalAsistencias = count($asistencias);
+    $mesActual = date('Y-m');
+    $asistenciasMes = 0;
+    $materiasDistintas = [];
+    foreach ($asistencias as $a) {
+        if (str_starts_with($a['fecha'] ?? '', $mesActual)) {
+            $asistenciasMes++;
+        }
+        if (!empty($a['materia'])) {
+            $materiasDistintas[$a['materia']] = true;
+        }
+    }
+    $totalMaterias = count($materiasDistintas);
+    ?>
+
+    <!-- Métricas del Alumno -->
+    <div class="stats-grid mb-6">
+        <div class="stat-card">
+            <span class="stat-label">Total de Asistencias</span>
+            <span class="stat-value text-primary"><?= $totalAsistencias ?></span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Asistencias en <?= strftime('%B') ?: date('F') ?></span>
+            <span class="stat-value" style="color: var(--color-accent-dark);"><?= $asistenciasMes ?></span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Materias Registradas</span>
+            <span class="stat-value"><?= $totalMaterias ?></span>
         </div>
     </div>
 
     <!-- Historial de Asistencias del Alumno -->
-    <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-        <h3 style="color: var(--azul-marino); font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Mi Historial de Asistencias</h3>
+    <div class="card">
+        <h3 class="text-primary font-bold mb-4" style="font-size: 1.2rem;">
+            Mi Historial de Asistencias
+        </h3>
         
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <div class="table-responsive">
+            <table class="table table-hover">
                 <thead>
-                    <tr style="border-bottom: 2px solid var(--borde); color: var(--texto-secundario);">
-                        <th style="padding: 10px 12px;">Fecha</th>
-                        <th style="padding: 10px 12px;">Hora</th>
-                        <th style="padding: 10px 12px;">Materia</th>
-                        <th style="padding: 10px 12px;">Docente</th>
-                        <th style="padding: 10px 12px;">Cód. Sesión</th>
-                        <th style="padding: 10px 12px; text-align: right;">Estado</th>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Materia</th>
+                        <th>Docente</th>
+                        <th>Cod. Sesion</th>
+                        <th class="text-right">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($asistencias)): ?>
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px; color: var(--texto-secundario);">
-                                No tienes asistencias registradas todavía.
+                            <td colspan="6" class="table-empty">
+                                No tienes asistencias registradas todavia.
                             </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($asistencias as $a): ?>
-                            <tr style="border-bottom: 1px solid var(--borde);">
-                                <td style="padding: 10px 12px; font-weight: 600;"><?= htmlspecialchars($a['fecha']) ?></td>
-                                <td style="padding: 10px 12px; color: var(--azul-marino); font-weight: 600;"><?= htmlspecialchars($a['hora']) ?></td>
-                                <td style="padding: 10px 12px; font-weight: 500;"><?= htmlspecialchars($a['materia']) ?></td>
-                                <td style="padding: 10px 12px; color: var(--texto-secundario);"><?= htmlspecialchars($a['docente']) ?></td>
-                                <td style="padding: 10px 12px; font-family: monospace; font-weight: 700;"><?= htmlspecialchars($a['codigo_sesion']) ?></td>
-                                <td style="padding: 10px 12px; text-align: right;">
-                                    <span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">PRESENTE</span>
+                            <tr>
+                                <td class="font-semibold"><?= htmlspecialchars($a['fecha']) ?></td>
+                                <td class="font-semibold text-primary"><?= htmlspecialchars($a['hora']) ?></td>
+                                <td class="font-medium"><?= htmlspecialchars($a['materia']) ?></td>
+                                <td class="text-muted"><?= htmlspecialchars($a['docente']) ?></td>
+                                <td class="table-code"><?= htmlspecialchars($a['codigo_sesion']) ?></td>
+                                <td class="text-right">
+                                    <span class="badge badge-success">PRESENTE</span>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -31,9 +31,17 @@ class ReporteController extends BaseController
         // Consultar al modelo Asistencia
         $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
 
+        $filtros = [
+            'fecha_inicio' => $fechaInicio,
+            'fecha_fin'    => $fechaFin,
+            'materia'      => $materia,
+            'busqueda'     => $busqueda
+        ];
+
         $this->vista('reportes.index', [
             'base'         => self::obtenerRutaBase(),
             'asistencias'  => $asistencias,
+            'filtros'      => $filtros,
             'fechaInicio'  => $fechaInicio,
             'fechaFin'     => $fechaFin,
             'materia'      => $materia,
@@ -47,8 +55,8 @@ class ReporteController extends BaseController
         $this->verificarDocente();
         $docenteId = (int)$_SESSION['docente_id'];
 
-        $fechaInicio = $_GET['fecha_inicio'] ?? null;
-        $fechaFin    = $_GET['fecha_fin'] ?? null;
+        $fechaInicio = !empty($_GET['fecha_inicio']) ? trim($_GET['fecha_inicio']) : null;
+        $fechaFin    = !empty($_GET['fecha_fin']) ? trim($_GET['fecha_fin']) : null;
         $materia     = trim($_GET['materia'] ?? '');
         $busqueda    = trim($_GET['busqueda'] ?? '');
 
@@ -56,8 +64,15 @@ class ReporteController extends BaseController
 
         $nombreArchivo = 'asistencias_' . date('Ymd_His') . '.csv';
 
+        // Limpiar cualquier búfer de salida previo para evitar corrupción del archivo CSV
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
         header('Content-Type: text/csv; charset=utf-8');
         header("Content-Disposition: attachment; filename=\"{$nombreArchivo}\"");
+        header('Pragma: no-cache');
+        header('Expires: 0');
 
         $salida = fopen('php://output', 'w');
 
@@ -70,18 +85,167 @@ class ReporteController extends BaseController
         // Escribir filas de datos
         foreach ($asistencias as $fila) {
             fputcsv($salida, [
-                $fila['id'],
-                $fila['fecha'],
-                $fila['hora'],
-                $fila['codigo'],
-                $fila['estudiante'],
-                $fila['carrera'],
-                $fila['materia'],
-                $fila['codigo_sesion']
+                $fila['id'] ?? '',
+                $fila['fecha'] ?? '',
+                $fila['hora'] ?? '',
+                $fila['codigo'] ?? '',
+                $fila['estudiante'] ?? '',
+                $fila['carrera'] ?? '',
+                $fila['materia'] ?? '',
+                $fila['codigo_sesion'] ?? ''
             ]);
         }
 
         fclose($salida);
+        exit;
+    }
+
+    public function exportarExcel(): void
+    {
+        $this->verificarDocente();
+        $docenteId = (int)$_SESSION['docente_id'];
+
+        $fechaInicio = !empty($_GET['fecha_inicio']) ? trim($_GET['fecha_inicio']) : null;
+        $fechaFin    = !empty($_GET['fecha_fin']) ? trim($_GET['fecha_fin']) : null;
+        $materia     = trim($_GET['materia'] ?? '');
+        $busqueda    = trim($_GET['busqueda'] ?? '');
+
+        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
+
+        $nombreArchivo = 'asistencias_' . date('Ymd_His') . '.xls';
+
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header("Content-Disposition: attachment; filename=\"{$nombreArchivo}\"");
+        header('Cache-Control: max-age=0');
+        header('Pragma: public');
+
+        echo '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+        echo '<head><meta charset="utf-8">';
+        echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Asistencias</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+        echo '<style>
+            .titulo-instituto { font-family: Calibri, Arial, sans-serif; font-size: 15pt; font-weight: bold; color: #1A2B4C; }
+            .subtitulo { font-family: Calibri, Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #B8912E; }
+            .meta { font-family: Calibri, Arial, sans-serif; font-size: 9.5pt; color: #475569; }
+            .th-header { background-color: #1A2B4C; color: #FFFFFF; font-family: Calibri, Arial, sans-serif; font-size: 10pt; font-weight: bold; text-align: center; border: 1px solid #CBD5E1; height: 28px; }
+            .td-cell { font-family: Calibri, Arial, sans-serif; font-size: 9.5pt; border: 1px solid #E2E8F0; padding: 6px; }
+            .td-center { text-align: center; }
+            .td-code { text-align: center; font-weight: bold; color: #1A2B4C; mso-number-format:"\@"; }
+            .td-date { text-align: center; mso-number-format:"yyyy-mm-dd"; }
+            .td-time { text-align: center; mso-number-format:"hh:mm:ss"; }
+            .zebra { background-color: #F8FAFC; }
+        </style>';
+        echo '</head><body>';
+        echo '<table border="0" cellpadding="4" cellspacing="0">';
+        echo '<tr><td colspan="7" class="titulo-instituto">INSTITUTO SUPERIOR TECNOLÓGICO MAYOR PEDRO TRAVERSARI</td></tr>';
+        echo '<tr><td colspan="7" class="subtitulo">SISTEMA INTEGRAL DE CONTROL DE ASISTENCIA — REPORTE OFICIAL</td></tr>';
+        echo '<tr><td colspan="7" class="meta">Fecha de Emisión: ' . date('d/m/Y H:i:s') . ' | Total de registros: ' . count($asistencias) . '</td></tr>';
+        if (!empty($fechaInicio) || !empty($fechaFin)) {
+            echo '<tr><td colspan="7" class="meta">Periodo: ' . htmlspecialchars($fechaInicio ?? 'Inicio') . ' al ' . htmlspecialchars($fechaFin ?? 'Hoy') . '</td></tr>';
+        }
+        if (!empty($materia)) {
+            echo '<tr><td colspan="7" class="meta">Materia: ' . htmlspecialchars($materia) . '</td></tr>';
+        }
+        echo '<tr><td colspan="7"></td></tr>';
+
+        echo '<thead><tr>';
+        echo '<th class="th-header" style="width: 100px;">Fecha</th>';
+        echo '<th class="th-header" style="width: 80px;">Hora</th>';
+        echo '<th class="th-header" style="width: 100px;">Código</th>';
+        echo '<th class="th-header" style="width: 260px;">Estudiante</th>';
+        echo '<th class="th-header" style="width: 220px;">Carrera</th>';
+        echo '<th class="th-header" style="width: 220px;">Materia</th>';
+        echo '<th class="th-header" style="width: 120px;">Código Sesión</th>';
+        echo '</tr></thead>';
+
+        echo '<tbody>';
+        if (empty($asistencias)) {
+            echo '<tr><td colspan="7" class="td-cell td-center" style="color: #64748B; font-style: italic;">No se encontraron asistencias para los criterios seleccionados.</td></tr>';
+        } else {
+            $esZebra = false;
+            foreach ($asistencias as $fila) {
+                $claseZebra = $esZebra ? ' zebra' : '';
+                echo '<tr>';
+                echo '<td class="td-cell td-date' . $claseZebra . '">' . htmlspecialchars($fila['fecha'] ?? '') . '</td>';
+                echo '<td class="td-cell td-time' . $claseZebra . '">' . htmlspecialchars($fila['hora'] ?? '') . '</td>';
+                echo '<td class="td-cell td-code' . $claseZebra . '">' . htmlspecialchars($fila['codigo'] ?? '') . '</td>';
+                echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['estudiante'] ?? '') . '</td>';
+                echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['carrera'] ?? '') . '</td>';
+                echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['materia'] ?? '') . '</td>';
+                echo '<td class="td-cell td-center' . $claseZebra . '">' . htmlspecialchars($fila['codigo_sesion'] ?? '') . '</td>';
+                echo '</tr>';
+                $esZebra = !$esZebra;
+            }
+        }
+        echo '</tbody></table></body></html>';
+        exit;
+    }
+
+    public function exportarPdf(): void
+    {
+        $this->verificarDocente();
+        $docenteId = (int)$_SESSION['docente_id'];
+        $docenteNombre = $_SESSION['docente_nombre'] ?? 'Docente ISTPET';
+
+        $fechaInicio = !empty($_GET['fecha_inicio']) ? trim($_GET['fecha_inicio']) : null;
+        $fechaFin    = !empty($_GET['fecha_fin']) ? trim($_GET['fecha_fin']) : null;
+        $materia     = trim($_GET['materia'] ?? '');
+        $busqueda    = trim($_GET['busqueda'] ?? '');
+
+        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
+
+        require_once dirname(__DIR__) . '/libs/ReportePdf.php';
+
+        $rango = '';
+        if ($fechaInicio && $fechaFin) {
+            $rango = "{$fechaInicio} al {$fechaFin}";
+        } elseif ($fechaInicio) {
+            $rango = "Desde {$fechaInicio}";
+        } elseif ($fechaFin) {
+            $rango = "Hasta {$fechaFin}";
+        }
+
+        $pdf = new ReportePdf($docenteNombre, $rango, $materia);
+        $pdf->AddPage();
+
+        if (empty($asistencias)) {
+            $pdf->Ln(5);
+            $pdf->SetFont('Helvetica', 'I', 10);
+            $pdf->SetTextColor(100, 116, 139);
+            $pdf->Cell(273, 14, $pdf->conv('No se encontraron registros de asistencias para los criterios seleccionados.'), 1, 1, 'C');
+        } else {
+            $pdf->SetFont('Helvetica', '', 8);
+            $fill = false;
+            foreach ($asistencias as $fila) {
+                if ($fill) {
+                    $pdf->SetFillColor(248, 250, 252); // Fondo alterno
+                } else {
+                    $pdf->SetFillColor(255, 255, 255);
+                }
+                $pdf->SetTextColor(30, 41, 59);
+                $pdf->SetDrawColor(226, 232, 240);
+
+                $pdf->Cell(22, 6.5, $fila['fecha'] ?? '', 1, 0, 'C', true);
+                $pdf->Cell(18, 6.5, $fila['hora'] ?? '', 1, 0, 'C', true);
+                $pdf->Cell(22, 6.5, $fila['codigo'] ?? '', 1, 0, 'C', true);
+                $pdf->celdaAjustada(64, 6.5, $fila['estudiante'] ?? '', 1, 0, 'L', $fill);
+                $pdf->celdaAjustada(55, 6.5, $fila['carrera'] ?? '', 1, 0, 'L', $fill);
+                $pdf->celdaAjustada(56, 6.5, $fila['materia'] ?? '', 1, 0, 'L', $fill);
+                $pdf->Cell(36, 6.5, $fila['codigo_sesion'] ?? '', 1, 1, 'C', true);
+
+                $fill = !$fill;
+            }
+        }
+
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        $nombreArchivo = 'asistencias_' . date('Ymd_His') . '.pdf';
+        $pdf->Output('D', $nombreArchivo);
         exit;
     }
 }

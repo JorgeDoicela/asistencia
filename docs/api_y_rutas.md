@@ -59,10 +59,12 @@ Este documento detalla todas las rutas registradas en el Front Controller (`publ
 
 ## 6. Reportes y Exportación
 
-| Método | Ruta | Parámetros Query | Controlador / Método | Middleware |
+| Método | Ruta | Parámetros Query | Controlador / Método | Salida / Middleware |
 |---|---|---|---|---|
-| `GET` | `/reportes` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::index` | `requiereDocente` |
-| `GET` | `/reportes/csv` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::exportarCsv` | `requiereDocente` |
+| `GET` | `/reportes` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::index` | Vista HTML (`requiereDocente`) |
+| `GET` | `/reportes/csv` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::exportarCsv` | Descarga CSV UTF-8 (`requiereDocente`) |
+| `GET` | `/reportes/excel` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::exportarExcel` | Descarga Excel .xls (`requiereDocente`) |
+| `GET` | `/reportes/pdf` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::exportarPdf` | Descarga PDF A4 (`requiereDocente`) |
 
 ---
 

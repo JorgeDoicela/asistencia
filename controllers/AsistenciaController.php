@@ -40,9 +40,10 @@ class AsistenciaController extends BaseController
         // Paso 1: Validar que los campos no esten vacios
         if (empty($codigoSesion) || empty($codigoEstudiante)) {
             $this->vista('asistencia.resultado', [
-                'base'    => self::obtenerRutaBase(),
-                'exito'   => false,
-                'mensaje' => 'Por favor complete todos los datos requeridos.'
+                'base'         => self::obtenerRutaBase(),
+                'exito'        => false,
+                'mensaje'      => 'Por favor complete todos los datos requeridos.',
+                'codigoSesion' => $codigoSesion
             ]);
             return;
         }
@@ -51,9 +52,10 @@ class AsistenciaController extends BaseController
         $sesion = Sesion::buscarPorCodigoActiva($codigoSesion);
         if (!$sesion) {
             $this->vista('asistencia.resultado', [
-                'base'    => self::obtenerRutaBase(),
-                'exito'   => false,
-                'mensaje' => "La sesion {$codigoSesion} no esta activa o ya fue finalizada por el docente."
+                'base'         => self::obtenerRutaBase(),
+                'exito'        => false,
+                'mensaje'      => "La sesion {$codigoSesion} no esta activa o ya fue finalizada por el docente.",
+                'codigoSesion' => $codigoSesion
             ]);
             return;
         }
@@ -62,9 +64,10 @@ class AsistenciaController extends BaseController
         $estudiante = Estudiante::buscarPorCodigo($codigoEstudiante);
         if (!$estudiante) {
             $this->vista('asistencia.resultado', [
-                'base'    => self::obtenerRutaBase(),
-                'exito'   => false,
-                'mensaje' => "El codigo {$codigoEstudiante} no corresponde a ningun estudiante registrado."
+                'base'         => self::obtenerRutaBase(),
+                'exito'        => false,
+                'mensaje'      => "El codigo {$codigoEstudiante} no corresponde a ningun estudiante registrado.",
+                'codigoSesion' => $codigoSesion
             ]);
             return;
         }
@@ -72,30 +75,44 @@ class AsistenciaController extends BaseController
         // Paso 4: Evitar que el alumno registre doble asistencia en la misma clase
         if (Asistencia::existe((int)$sesion['id'], (int)$estudiante['id'])) {
             $this->vista('asistencia.resultado', [
-                'base'       => self::obtenerRutaBase(),
-                'exito'      => false,
-                'mensaje'    => "El estudiante {$estudiante['nombre']} {$estudiante['apellido']} ya tiene registrada su asistencia en esta sesion.",
-                'estudiante' => $estudiante,
-                'sesion'     => $sesion
+                'base'         => self::obtenerRutaBase(),
+                'exito'        => false,
+                'mensaje'      => "El estudiante {$estudiante['nombre']} {$estudiante['apellido']} ya tiene registrada su asistencia en esta sesion.",
+                'estudiante'   => $estudiante,
+                'sesion'       => $sesion,
+                'codigoSesion' => $codigoSesion
             ]);
             return;
         }
 
         // Paso 5: Registrar la asistencia en la base de datos
         if (Asistencia::registrar((int)$sesion['id'], (int)$estudiante['id'])) {
+            // Inicializar automáticamente la sesión del estudiante para que pueda ver su portal directo
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            if (empty($_SESSION['docente_id'])) {
+                $_SESSION['estudiante_id']     = $estudiante['id'];
+                $_SESSION['estudiante_codigo'] = $estudiante['codigo'];
+                $_SESSION['estudiante_nombre'] = $estudiante['nombre'] . ' ' . $estudiante['apellido'];
+                $_SESSION['estudiante_carrera']= $estudiante['carrera'];
+            }
+
             $this->vista('asistencia.resultado', [
-                'base'       => self::obtenerRutaBase(),
-                'exito'      => true,
-                'mensaje'    => 'Asistencia confirmada exitosamente.',
-                'estudiante' => $estudiante,
-                'sesion'     => $sesion,
-                'hora'       => date('H:i:s')
+                'base'         => self::obtenerRutaBase(),
+                'exito'        => true,
+                'mensaje'      => 'Asistencia confirmada exitosamente.',
+                'estudiante'   => $estudiante,
+                'sesion'       => $sesion,
+                'codigoSesion' => $codigoSesion,
+                'hora'         => date('H:i:s')
             ]);
         } else {
             $this->vista('asistencia.resultado', [
-                'base'    => self::obtenerRutaBase(),
-                'exito'   => false,
-                'mensaje' => 'Ocurrio un error al guardar la asistencia.'
+                'base'         => self::obtenerRutaBase(),
+                'exito'        => false,
+                'mensaje'      => 'Ocurrio un error al guardar la asistencia.',
+                'codigoSesion' => $codigoSesion
             ]);
         }
     }

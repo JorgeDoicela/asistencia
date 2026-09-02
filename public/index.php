@@ -14,6 +14,9 @@ require_once dirname(__DIR__) . '/controllers/ReporteController.php';
 // 2. Obtener la ruta solicitada por el usuario
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+if ($metodo === 'HEAD') {
+    $metodo = 'GET';
+}
 
 // Ajustar la ruta si el proyecto esta dentro de una subcarpeta en XAMPP
 $directorio = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
@@ -96,12 +99,18 @@ switch ("{$metodo} {$ruta}") {
         (new AsistenciaController())->apiListarActivas();
         break;
 
-    // Reportes y Descarga en Excel (CSV)
+    // Reportes y Exportación (CSV, Excel, PDF)
     case 'GET /reportes':
         (new ReporteController())->index();
         break;
     case 'GET /reportes/csv':
         (new ReporteController())->exportarCsv();
+        break;
+    case 'GET /reportes/excel':
+        (new ReporteController())->exportarExcel();
+        break;
+    case 'GET /reportes/pdf':
+        (new ReporteController())->exportarPdf();
         break;
 
     // Ruta no encontrada (404)
