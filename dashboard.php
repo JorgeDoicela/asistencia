@@ -70,30 +70,17 @@ try {
     error_log("Error al consultar sesión activa: " . $e->getMessage());
 }
 
-// URL codificada para el QR
-// Detectar si viene a través de tunnel (público) o local
-$host = $_SERVER['HTTP_HOST'];
-
-// Si viene del tunnel público localtunnel, usarlo directamente
-if (strpos($host, '.loca.lt') !== false) {
-    // Tunnel público - usar HTTPS sin puerto
-    $urlBase = 'https://' . $host . dirname($_SERVER['PHP_SELF']);
-} elseif (strpos($host, 'localhost') === 0 || strpos($host, '127.0.0.1') === 0) {
-    // Localhost - detectar IP WiFi para acceso local
-    $ipWifi = null;
-    $output = shell_exec('ipconfig');
-    if (preg_match('/192\.168\.100\.\d+/', $output, $matches)) {
-        $ipWifi = $matches[0];
-    }
-    
-    // Si no encontramos la IP Wi-Fi, usar la del servidor
-    $ip = $ipWifi ?? $_SERVER['SERVER_ADDR'] ?? gethostbyname(gethostname());
-    $port = $_SERVER['SERVER_PORT'];
-    $urlBase = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $ip . ':' . $port . dirname($_SERVER['PHP_SELF']);
+// URL base para el código QR (Compatible con Docker, Localhost y Tunnels)
+$customAppUrl = getenv('APP_URL');
+if (!empty($customAppUrl)) {
+    $urlBase = rtrim($customAppUrl, '/');
 } else {
-    // Otra IP - usar tal como viene
-    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-    $urlBase = $protocol . '://' . $host . dirname($_SERVER['PHP_SELF']);
+    $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') 
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    $protocol = $isHttps ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
+    $scriptDir = rtrim(dirname($_SERVER['PHP_SELF'] ?? ''), '/\\');
+    $urlBase = $protocol . '://' . $host . ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.' ? '' : $scriptDir);
 }
 
 $urlEscaneo = $sesionActiva ? $urlBase . '/formulario.php?clase=' . urlencode($sesionActiva['codigo_sesion']) : '';
@@ -502,7 +489,7 @@ $urlEscaneo = $sesionActiva ? $urlBase . '/formulario.php?clase=' . urlencode($s
         <button class="menu-btn" id="openMenu" title="Abrir menú">
             <i class="fas fa-bars"></i>
         </button>
-        <img src="https://istpet.edu.ec/wp-content/uploads/2021/04/LOGO-ISTPET.png" alt="Logo ISTPET" class="logo-istpet">
+        <img src="https://istpet.edu.ec/wp-content/uploads/2025/02/ISTPET-LOGO-300x300.jpg" alt="Logo ISTPET" class="logo-istpet">
     </div>
     <div class="brand">Asistencia ISTPET</div>
     <div class="navbar-right">
@@ -586,8 +573,14 @@ $urlEscaneo = $sesionActiva ? $urlBase . '/formulario.php?clase=' . urlencode($s
 
                 <div class="qr-info">
                     <i class="fas fa-info-circle" style="color: var(--azul);"></i> Código de sesión: <span class="qr-codigo"><?= htmlspecialchars($sesionActiva['codigo_sesion']) ?></span><br>
-                    Los estudiantes deben escanear este QR o ingresar el código manualmente en
-                    <br><a href="escanear.php" target="_blank">escanear.php</a>
+                    <small style="display:block; margin-top:6px; color:#555; word-break:break-all;">
+                        <i class="fas fa-link"></i> <strong>Enlace QR:</strong> <a href="<?= htmlspecialchars($urlEscaneo) ?>" target="_blank"><?= htmlspecialchars($urlEscaneo) ?></a>
+                    </small>
+                    <?php if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false): ?>
+                        <div style="margin-top:8px; padding:6px 10px; background:#fff3cd; border:1px solid #ffeeba; border-radius:4px; font-size:12px; color:#856404; text-align:left;">
+                            <i class="fas fa-mobile-alt"></i> <strong>Para escanear con celulares:</strong> Abre este panel docente usando la IP local de tu PC (ej: <code>http://<?= gethostbyname(gethostname()) ?>:8080</code> o tu IP Wi-Fi) para que el QR contenga una dirección accesible desde otros dispositivos.
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <form method="POST" style="margin-top:14px;">

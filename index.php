@@ -244,9 +244,9 @@ if (isset($_SESSION['estudiante_id'])) {
 
     <div class="info-codigo">
         <p><strong>¿Cómo funciona?</strong></p>
-        <p>El docente genera un QR único para cada clase. Los estudiantes escanean el QR con su teléfono y registran su asistencia al momento. 📱</p>
+        <p>El docente genera un QR único para cada clase. Los estudiantes escanean el QR con su teléfono y registran su asistencia al momento.</p>
         <div class="codigo-destacado">
-            Escanea → Rellena Datos → Registrado ✓
+            Escanea &rarr; Rellena Datos &rarr; Registrado
         </div>
     </div>
 

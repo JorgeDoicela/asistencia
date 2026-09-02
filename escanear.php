@@ -55,9 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>Ingresa tu código de estudiante</p>
 
             <?php if ($resultado === 'ok'): ?>
-                <div class="ok-msg">✔ <?= htmlspecialchars($mensaje) ?></div>
+                <div class="ok-msg"><?= htmlspecialchars($mensaje) ?></div>
             <?php elseif ($resultado === 'error'): ?>
-                <div class="fail-msg">✘ <?= htmlspecialchars($mensaje) ?></div>
+                <div class="fail-msg"><?= htmlspecialchars($mensaje) ?></div>
             <?php endif; ?>
 
             <form method="POST" style="margin-top:18px; text-align:left;">
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label>Tu código de estudiante</label>
                     <input type="text" name="codigo" placeholder="Ej. EST001" required autofocus>
                 </div>
-                <button class="btn" style="width:100%; padding:12px;" type="submit">✓ Registrar Asistencia</button>
+                <button class="btn" style="width:100%; padding:12px;" type="submit">Registrar Asistencia</button>
             </form>
         </div>
     </div>

@@ -64,9 +64,10 @@ CREATE TABLE asistencias (
 -- INSERTAR DATOS DE PRUEBA
 -- ============================================
 
--- Docente de prueba (usuario: Demo / contraseña: Demo123)
+-- Docentes de prueba (usuario: profesor / clave: 12345  y  usuario: Demo / clave: Demo123)
 INSERT INTO docentes (nombre, usuario, password) VALUES
-('Profesor Demo', 'Demo', '$2y$10$pv9Dh6jAHhNWq4t7vZ3c0.5MH8Y6R2K1L9X4W7V2Q5P3N1M0O9B');
+('Ing. Docente Titular', 'profesor', '$2y$10$sjeeJXsdpd.qkFYS6LZfD.8unT/gnk.hiysbOb9uRI4z60eF3l/km'),
+('Profesor Demo', 'Demo', '$2y$10$HYRlu/.cbxrjZ2AYGLkyDOiiSpItAClovLSYdb64mvmd8KS.vwRmy');
 
 -- Estudiantes de prueba
 INSERT INTO estudiantes (codigo, nombre, apellido, carrera) VALUES

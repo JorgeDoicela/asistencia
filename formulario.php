@@ -53,7 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['status' => 'success', 'mensaje' => '¡Asistencia registrada correctamente!']);
     } catch (PDOException $e) {
         error_log("Error al guardar asistencia: " . $e->getMessage());
-        echo json_encode(['status' => 'error', 'mensaje' => 'Error al guardar: ' . $e->getMessage()]);
+        if ($e->getCode() == 23000 || strpos($e->getMessage(), 'Duplicate') !== false || strpos($e->getMessage(), 'unica_asistencia') !== false) {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Ya has registrado tu asistencia en esta sesión de clase.']);
+        } else {
+            echo json_encode(['status' => 'error', 'mensaje' => 'Ocurrió un error al guardar la asistencia.']);
+        }
     }
     exit;
 }
@@ -427,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!codigoSesion || codigoSesion.trim() === '') {
             alerta.style.display = 'block';
             alerta.className = 'alerta error';
-            alerta.innerText = '⚠️ Debe escanear un código QR válido';
+            alerta.innerText = 'Debe escanear un código QR válido';
             return;
         }
 
@@ -455,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Mostrar confirmación
                 alerta.style.display = 'block';
                 alerta.className = 'alerta exito';
-                alerta.innerText = '✓ Asistencia registrada correctamente';
+                alerta.innerText = 'Asistencia registrada correctamente';
                 
                 // Limpiar en 3 segundos
                 setTimeout(() => {
@@ -464,12 +468,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 alerta.style.display = 'block';
                 alerta.className = 'alerta error';
-                alerta.innerText = '❌ ' + res.mensaje;
+                alerta.innerText = res.mensaje;
             }
         } catch (err) {
             alerta.style.display = 'block';
             alerta.className = 'alerta error';
-            alerta.innerText = '❌ Error de conexión';
+            alerta.innerText = 'Error de conexión';
         } finally {
             // Restaurar botón
             btnGuardar.disabled = false;

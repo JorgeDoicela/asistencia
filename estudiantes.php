@@ -365,7 +365,7 @@ $estudiantes = $pdo->query('SELECT * FROM estudiantes ORDER BY nombre ASC')->fet
             <i class="fas fa-bars"></i>
         </button>
         <a href="dashboard.php" class="logo-link" title="Ir al Inicio">
-            <img src="https://istpet.edu.ec/wp-content/uploads/2021/04/LOGO-ISTPET.png" alt="Logo ISTPET" class="logo-istpet">
+            <img src="https://istpet.edu.ec/wp-content/uploads/2025/02/ISTPET-LOGO-300x300.jpg" alt="Logo ISTPET" class="logo-istpet">
         </a>
     </div>
     <div class="brand">Asistencia ISTPET</div>
