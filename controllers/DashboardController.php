@@ -9,15 +9,6 @@ require_once dirname(__DIR__) . '/models/Estudiante.php';
 
 class DashboardController extends BaseController
 {
-    private function verificarDocente(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (empty($_SESSION['docente_id'])) {
-            $this->redireccionar('/login');
-        }
-    }
 
     public function index(): void
     {

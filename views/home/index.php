@@ -16,7 +16,32 @@ require dirname(__DIR__) . '/layouts/header.php';
             <p class="home-subtitle">Instituto Superior Tecnológico Mayor Pedro Traversari</p>
         </div>
 
-        <?php if (!empty($_SESSION['docente_id'])): ?>
+        <?php 
+        $rolSesion = $_SESSION['usuario_rol'] ?? $_SESSION['docente_rol'] ?? '';
+        if (!empty($_SESSION['docente_id']) && $rolSesion === 'admin'): 
+        ?>
+            <!-- Banner de Continuación para Administradores Autenticados -->
+            <div class="card mb-6 text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; border: 1px solid #334155; padding: 22px;">
+                <span class="badge badge-info pulse-badge mb-2" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;">SESIÓN ADMINISTRATIVA ACTIVA</span>
+                <h3 style="color: #ffffff; font-size: 1.25rem; margin-bottom: 6px;">
+                    Bienvenido, <?= htmlspecialchars($_SESSION['usuario_nombre'] ?? $_SESSION['docente_nombre'] ?? 'Administrador') ?>
+                </h3>
+                <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 16px;">
+                    Tienes privilegios de administración global: supervisión en vivo, gestión de docentes y reportes consolidados.
+                </p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="<?= $base ?>/admin" class="btn btn-dorado btn-lg">
+                        Ir al Panel de Administración &rarr;
+                    </a>
+                    <a href="<?= $base ?>/admin/docentes" class="btn btn-outline" style="color: #cbd5e1; border-color: #475569;">
+                        Gestionar Docentes
+                    </a>
+                    <a href="<?= $base ?>/logout" class="btn btn-outline" style="color: #cbd5e1; border-color: #475569;">
+                        Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        <?php elseif (!empty($_SESSION['docente_id'])): ?>
             <!-- Banner de Continuación Rápida para Docentes Autenticados -->
             <div class="card mb-6 text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #ffffff; border: 1px solid #334155; padding: 22px;">
                 <span class="badge badge-info pulse-badge mb-2">SESIÓN DOCENTE ACTIVA</span>
@@ -56,22 +81,22 @@ require dirname(__DIR__) . '/layouts/header.php';
             </div>
         <?php endif; ?>
 
-        <!-- Las 2 Opciones Principales de los Chicos -->
+        <!-- Las Opciones Principales -->
         <div class="home-opciones">
-            <!-- Opcion Docentes -->
+            <!-- Opción Personal Docente y Administrativo -->
             <div class="home-card-role">
                 <div>
-                    <h2>Docentes</h2>
+                    <h2>Personal Académico</h2>
                     <p>
-                        Accede a tu panel para generar codigos QR de clase en vivo, monitorear asistencias en tiempo real y exportar reportes.
+                        Acceso para docentes y administradores. Proyecta códigos QR en vivo, supervisa asistencia institucional y gestiona personal.
                     </p>
                 </div>
                 <div class="home-buttons-stack">
                     <a href="<?= $base ?>/login" class="btn btn-primary btn-lg btn-block">
-                        Iniciar Sesion Docente &rarr;
+                        Acceso Docentes / Administración &rarr;
                     </a>
                     <div style="font-size: 0.82rem; color: var(--color-text-muted); padding: 8px 0;">
-                        Panel institucional para profesores
+                        Portal unificado de acceso institucional
                     </div>
                 </div>
             </div>

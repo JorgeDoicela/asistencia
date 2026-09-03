@@ -79,16 +79,24 @@ Recomendado si tienes el motor MySQL oficial con MySQL Workbench instalado indep
 
 ## 4. Manual de Usuario Rápido
 
-### 4.1. Para Docentes:
+### 4.1. Para Administradores:
+1. **Inicio de Sesión:** Accede a `/login` con las credenciales:
+   * **Administrador General:** `admin` / Clave: `admin123`
+2. **Supervisión en Vivo:** En `/admin`, supervisa las métricas de concurrencia diaria, distribución por carrera y el panel de clases activas en tiempo real en toda la institución.
+3. **Cierre Forzoso:** Si un docente olvidó cerrar su clase, presiona **Finalizar Clase** desde la tabla en vivo para cortar el flujo de asistencias.
+4. **Directorio de Personal:** En `/admin/docentes`, registra nuevos profesores o administradores, edita sus datos, activa o suspende cuentas y restablece contraseñas con cifrado Bcrypt.
+5. **Auditoría y Reportes Globales:** En `/reportes`, visualiza la asistencia de cualquier docente de la institución o de todos en conjunto, con desglose por carrera y descarga en CSV, Excel o PDF oficial membretado.
+
+### 4.2. Para Docentes:
 1. **Inicio de Sesión:** Accede a `/login` con las credenciales:
    * **Docente Titular:** `profesor` / Clave: `12345`
    * **Docente Demo:** `Demo` / Clave: `Demo123`
 2. **Generar Clase:** Selecciona Carrera, Nivel, pulsa sobre una materia sugerida y presiona **Generar Código QR de Asistencia**.
 3. **Modo Proyector:** Presiona el botón azul para ampliar el código QR en pantalla gigante para los estudiantes.
 4. **Gestión de Estudiantes:** En `/estudiantes`, presiona `+ Registrar Nuevo Estudiante` para ver el código correlativo autogenerado (ej. `EST009`), o edita/elimina alumnos existentes.
-5. **Reportes:** En `/reportes`, filtra por fechas o materias y descarga los reportes oficiales en **CSV**, **Excel (.xls)** o **PDF membretado**.
+5. **Reportes Propios:** En `/reportes`, filtra por fechas o materias y descarga los reportes de sus asignaturas.
 
-### 4.2. Para Estudiantes:
+### 4.3. Para Estudiantes:
 1. **Acceso a Escaneo:** Ingresa a `/asistencia/escanear` (o escanea el QR con la cámara del celular).
 2. **Reconocimiento:** Apunta al QR; la cámara detectará el código y emitirá un sonido de confirmación.
 3. **Registro:** Ingresa tu código institucional (`EST001` a `EST008`) y presiona **Confirmar Mi Asistencia**.
@@ -103,23 +111,29 @@ Esta guía está diseñada para que el grupo de estudiantes exponga el proyecto 
 ### 5.1. Flujo de Demostración en Vivo (Paso a Paso):
 
 1. **Introducción y Arquitectura (2 minutos):**
-   * Mostrar la estructura de carpetas limpia y explicar cómo el patrón MVC separa responsabilidades: *Modelos (SQL PDO)*, *Vistas (HTML/CSS limpio)* y *Controladores (Lógica y Despacho)*.
-2. **Demostración del Panel Docente y Proyector (3 minutos):**
+   * Mostrar la estructura de carpetas limpia y explicar cómo el patrón MVC separa responsabilidades: *Modelos (SQL PDO)*, *Vistas (HTML/CSS limpio)* y *Controladores (Lógica, Despacho y RBAC)*.
+2. **Demostración del Rol de Administrador Institucional (2 minutos):**
+   * Iniciar sesión con `admin` / `admin123`.
+   * Mostrar el panel de supervisión en vivo `/admin` con indicadores de pulso de aulas activas en tiempo real.
+   * Acceder a `/admin/docentes`, demostrar el alta de un nuevo profesor con validación y modal reactivo, y el reseteo de claves con Bcrypt.
+3. **Demostración del Panel Docente y Proyector (3 minutos):**
    * Iniciar sesión como docente (`profesor` / `12345`).
    * Mostrar la selección inteligente de materias con chips interactivos.
    * Generar la sesión de clase y activar el **Modo Proyector** a pantalla completa con desenfoque de fondo.
-3. **Demostración del Escaneo en Vivo con Móvil (3 minutos):**
+4. **Demostración del Escaneo en Vivo con Móvil (3 minutos):**
    * Abrir la cámara web o del teléfono móvil conectado a la red local.
    * Apuntar al proyector: demostrar cómo el sistema detecta el QR instantáneamente.
    * Registrar al alumno `EST001`: destacar el **feedback acústico inmediato** (tono armónico de confirmación en el celular y sonido de campana institucional en el proyector del docente).
    * Mostrar cómo la **Tabla en Vivo del Docente se actualiza automáticamente** sin recargar la página gracias a la API JSON en tiempo real.
-4. **Demostración de Reglas de Negocio y Seguridad (2 minutos):**
+5. **Demostración de Reglas de Negocio y Seguridad (2 minutos):**
    * Intentar registrar al mismo alumno `EST001` por segunda vez: mostrar cómo el sistema y la restricción `UNIQUE` en MySQL rechazan el duplicado y emiten un tono de advertencia.
-5. **Demostración de Reportes Multiformato (2 minutos):**
-   * Ir al módulo de Reportes.
-   * Descargar en vivo el **CSV** (con BOM UTF-8), el **Excel estructurado** con colores institucionales y el **PDF oficial membretado en A4 Landscape**.
-6. **Verificación en Base de Datos (1 minuto):**
-   * Abrir **MySQL Workbench** y ejecutar `SELECT * FROM asistencias;` para mostrar la persistencia exacta de los datos con sus llaves foráneas.
+   * Demostrar que un docente normal no puede ingresar a `/admin` (redirección protegida con mensaje flash).
+6. **Demostración de Reportes Multiformato (2 minutos):**
+   * Ir al módulo de Reportes como administrador.
+   * Filtrar por docente y carrera técnica.
+   * Descargar en vivo el **CSV** (con BOM UTF-8 y columna Docente), el **Excel estructurado** con colores institucionales y el **PDF oficial membretado en A4 Landscape**.
+7. **Verificación en Base de Datos (1 minuto):**
+   * Abrir **MySQL Workbench** y ejecutar `SELECT * FROM docentes;` y `SELECT * FROM asistencias;` para mostrar la persistencia exacta de los datos con sus llaves foráneas y hashes Bcrypt.
 
 ---
 
@@ -131,12 +145,16 @@ Esta guía está diseñada para que el grupo de estudiantes exponga el proyecto 
 
 ### Pregunta 2: ¿Cómo garantizan la seguridad contra inyecciones SQL y ataques XSS?
 > **Respuesta Recomendada:**  
-> *"La seguridad contra inyección SQL está garantizada al 100% mediante el uso exclusivo de PDO con consultas preparadas y parámetros enlazados en todos los modelos. Para prevenir ataques Cross-Site Scripting (XSS), todas las variables que se renderizan en las vistas pasan por `htmlspecialchars` con codificación UTF-8. Además, las contraseñas docentes se almacenan con algoritmos de hashing BCRYPT mediante `password_hash()`."*
+> *"La seguridad contra inyección SQL está garantizada al 100% mediante el uso exclusivo de PDO con consultas preparadas y parámetros enlazados en todos los modelos. Para prevenir ataques Cross-Site Scripting (XSS), todas las variables que se renderizan en las vistas pasan por `htmlspecialchars` con codificación UTF-8. Además, las contraseñas de personal se almacenan con algoritmos de hashing BCRYPT mediante `password_hash()`."*
 
-### Pregunta 3: ¿Cómo funciona el escaneo de la cámara sin requerir una app móvil instalada?
+### Pregunta 3: ¿Cómo funciona el control de acceso basado en roles (RBAC)?
+> **Respuesta Recomendada:**  
+> *"La clase abstracta `BaseController` centraliza los métodos `verificarAdmin()` y `verificarDocente()`, validando las variables de sesión del servidor en cada petición antes de ejecutar cualquier acción. Si un usuario intenta acceder a una ruta para la que no tiene privilegios (por ejemplo, un docente intentando ingresar a `/admin`), el middleware intercepta la petición, genera un mensaje flash en sesión y lo redirige a su área permitida."*
+
+### Pregunta 4: ¿Cómo funciona el escaneo de la cámara sin requerir una app móvil instalada?
 > **Respuesta Recomendada:**  
 > *"Utilizamos tecnologías web estándar modernas: la API nativa `BarcodeDetector` por hardware del navegador y la biblioteca JavaScript `jsQR` ejecutada localmente sobre un elemento `<canvas>`. Para garantizar compatibilidad universal en redes locales HTTP, incluimos un fallback con captura fotográfica nativa del sistema operativo que redimensiona dinámicamente la imagen a 800 píxeles, logrando decodificar el código QR en menos de 50 milisegundos."*
 
-### Pregunta 4: ¿Cómo se implementó el feedback de audio sin archivos MP3 externos?
+### Pregunta 5: ¿Cómo se implementó el feedback de audio sin archivos MP3 externos?
 > **Respuesta Recomendada:**  
 > *"Utilizamos la API nativa de JavaScript `AudioContext` (Web Audio API) para sintetizar ondas sonoras senoidales puras mediante código directamente en la tarjeta de sonido del dispositivo. Esto elimina por completo la necesidad de descargar archivos de audio externos, logrando 0 KB de sobrecarga y latencia cero."*

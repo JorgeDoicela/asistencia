@@ -8,16 +8,19 @@ require_once dirname(__DIR__) . '/models/Estudiante.php';
 
 class AuthController extends BaseController
 {
-    // Muestra el formulario de login para docentes
+    // Muestra el formulario de login para docentes y administradores
     public function mostrarLoginDocente(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $this->iniciarSesion();
 
-        // Si ya inicio sesion como docente, llevarlo directamente al panel
-        if (!empty($_SESSION['docente_id'])) {
-            $this->redireccionar('/dashboard');
+        // Si ya inició sesión, redirigir según su rol
+        if (!empty($_SESSION['usuario_id']) || !empty($_SESSION['docente_id'])) {
+            $rol = $_SESSION['usuario_rol'] ?? $_SESSION['docente_rol'] ?? 'docente';
+            if ($rol === 'admin') {
+                $this->redireccionar('/admin');
+            } else {
+                $this->redireccionar('/dashboard');
+            }
         }
 
         $error = $_SESSION['flash_error'] ?? null;
@@ -29,12 +32,10 @@ class AuthController extends BaseController
         ]);
     }
 
-    // Procesa los datos del formulario de login de docente
+    // Procesa los datos del formulario de login (docente o administrador)
     public function loginDocente(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $this->iniciarSesion();
 
         $usuario  = trim($_POST['usuario'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -47,25 +48,53 @@ class AuthController extends BaseController
         // Consultar al modelo Docente
         $docente = Docente::buscarPorUsuario($usuario);
 
-        // Verificar la contrasena cifrada con password_verify
+        // Verificar existencia y contraseña cifrada con password_verify
         if ($docente && password_verify($password, $docente['password'])) {
-            $_SESSION['docente_id']     = $docente['id'];
-            $_SESSION['docente_nombre'] = $docente['nombre'];
-            $_SESSION['docente_usuario']= $docente['usuario'];
-            $this->redireccionar('/dashboard');
+            // Verificar si el usuario está activo
+            if (isset($docente['activo']) && (int)$docente['activo'] === 0) {
+                $_SESSION['flash_error'] = 'Su cuenta institucional está inactiva. Contacte al Administrador.';
+                $this->redireccionar('/login');
+            }
+
+            $rol = $docente['rol'] ?? 'docente';
+
+            $_SESSION['usuario_id']      = (int)$docente['id'];
+            $_SESSION['usuario_nombre']  = $docente['nombre'];
+            $_SESSION['usuario_usuario'] = $docente['usuario'];
+            $_SESSION['usuario_rol']     = $rol;
+
+            // Variables de retrocompatibilidad
+            $_SESSION['docente_id']      = (int)$docente['id'];
+            $_SESSION['docente_nombre']  = $docente['nombre'];
+            $_SESSION['docente_usuario'] = $docente['usuario'];
+            $_SESSION['docente_rol']     = $rol;
+
+            // Redirección inteligente según el rol institucional
+            if ($rol === 'admin') {
+                $this->redireccionar('/admin');
+            } else {
+                $this->redireccionar('/dashboard');
+            }
         } else {
-            $_SESSION['flash_error'] = 'Usuario o contrasena incorrectos.';
+            $_SESSION['flash_error'] = 'Usuario o contraseña incorrectos.';
             $this->redireccionar('/login');
         }
     }
 
-    // Cierra la sesion del docente
+    // Cierra la sesión del docente o administrador
     public function logoutDocente(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        unset($_SESSION['docente_id'], $_SESSION['docente_nombre'], $_SESSION['docente_usuario']);
+        $this->iniciarSesion();
+        unset(
+            $_SESSION['usuario_id'],
+            $_SESSION['usuario_nombre'],
+            $_SESSION['usuario_usuario'],
+            $_SESSION['usuario_rol'],
+            $_SESSION['docente_id'],
+            $_SESSION['docente_nombre'],
+            $_SESSION['docente_usuario'],
+            $_SESSION['docente_rol']
+        );
         session_destroy();
         $this->redireccionar('/login');
     }

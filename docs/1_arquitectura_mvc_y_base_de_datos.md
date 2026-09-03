@@ -72,9 +72,10 @@ asistencia/
 │   ├── Sesion.php              # Apertura, token QR y finalización de clases
 │   └── Asistencia.php          # Registro de marcas, consultas en vivo y filtros
 ├── controllers/                # CONTROLADORES (Recepción de peticiones y flujo)
-│   ├── BaseController.php      # Métodos base ($this->vista, $this->json, $this->redireccionar)
+│   ├── BaseController.php      # Métodos base ($this->vista, $this->json, $this->redireccionar, RBAC)
 │   ├── HomeController.php      # Portal de bienvenida e información institucional
-│   ├── AuthController.php      # Login y Logout de docentes y acceso estudiantil
+│   ├── AuthController.php      # Login y Logout de personal y acceso estudiantil
+│   ├── AdminController.php     # Panel institucional, personal docente y supervisión en vivo
 │   ├── DashboardController.php # Panel de control del profesor y generación de QR
 │   ├── EstudianteController.php# Mantenimiento de alumnos y portal del estudiante
 │   ├── AsistenciaController.php# Confirmación de escaneo y API de tiempo real
@@ -83,9 +84,10 @@ asistencia/
 │   ├── ReportePdf.php          # Extensión de FPDF con membrete y estilos del ISTPET
 │   └── fpdf/                   # Motor FPDF 1.86 independiente (sin Composer)
 ├── views/                      # VISTAS (Interfaz Visual HTML5)
-│   ├── layouts/                # Encabezado (header.php) y pie de página (footer.php)
+│   ├── layouts/                # Encabezado con navbar condicional (header.php) y pie (footer.php)
 │   ├── home/                   # Pantalla de selección de rol e institucional
-│   ├── auth/                   # Formularios de acceso (docentes y estudiantes)
+│   ├── auth/                   # Formularios de acceso institucional y estudiantil
+│   ├── admin/                  # Panel de supervisión en tiempo real y directorio de personal
 │   ├── dashboard/              # Panel de asistencia en vivo y modo proyector
 │   ├── estudiantes/            # Listado tabular, modal de alta y portal estudiantil
 │   ├── asistencia/             # Visor de escaneo de cámara y confirmación acústica
@@ -115,14 +117,14 @@ asistencia/
 ```text
 ┌─────────────────┐       1:N       ┌─────────────────┐       1:N       ┌─────────────────┐
 │    docentes     ├─────────────────┤    sesiones     ├─────────────────┤   asistencias   │
-│                 │                 │                 │                 │                 │
+│(Personal/Admin) │                 │                 │                 │                 │
 │ id (PK)         │                 │ id (PK)         │                 │ id (PK)         │
 │ nombre          │                 │ docente_id (FK) │                 │ sesion_id (FK)  │
 │ usuario (UQ)    │                 │ codigo_sesion   │            ┌────┤ estudiante_id   │
 │ password        │                 │ materia         │            │    │ fecha, hora     │
-└─────────────────┘                 │ activa          │            │    └─────────────────┘
-                                    └─────────────────┘            │
-                                                                   │ 1:N
+│ rol (ENUM)      │                 │ activa          │            │    └─────────────────┘
+│ activo (TINYINT)│                 └─────────────────┘            │
+└─────────────────┘                                                │ 1:N
                                                             ┌──────┴──────────┐
                                                             │   estudiantes   │
                                                             │                 │
@@ -136,11 +138,13 @@ asistencia/
 ### 3.1. Tablas y Especificación de Columnas:
 
 #### A. Tabla: `docentes`
-Almacena las cuentas de acceso para los profesores de la institución.
-* `id` (`INT AUTO_INCREMENT PRIMARY KEY`): Identificador único del docente.
-* `nombre` (`VARCHAR(150) NOT NULL`): Nombres y apellidos completos.
-* `usuario` (`VARCHAR(100) NOT NULL UNIQUE`): Nombre de usuario para autenticación.
+Almacena las cuentas de acceso para los profesores y administradores de la institución.
+* `id` (`INT AUTO_INCREMENT PRIMARY KEY`): Identificador único del usuario institucional.
+* `nombre` (`VARCHAR(150) NOT NULL`): Nombres y apellidos completos con título académico.
+* `usuario` (`VARCHAR(100) NOT NULL UNIQUE`): Nombre de usuario para autenticación en el portal.
 * `password` (`VARCHAR(255) NOT NULL`): Contraseña cifrada mediante hash BCRYPT (`password_hash`).
+* `rol` (`ENUM('docente', 'admin') NOT NULL DEFAULT 'docente'`): Perfil y nivel de autorización asignado.
+* `activo` (`TINYINT(1) NOT NULL DEFAULT 1`): `1` para cuenta habilitada; `0` para cuenta suspendida/inactiva.
 * `creado_en` (`TIMESTAMP DEFAULT CURRENT_TIMESTAMP`): Fecha y hora de creación.
 
 #### B. Tabla: `estudiantes`
@@ -188,13 +192,21 @@ El archivo [`public/index.php`](../public/index.php) opera como **Front Controll
 |---|---|---|---|---|
 | `GET` | `/` | - | `HomeController::index` | Vista pública inicial |
 | `GET` | `/institucional` | - | `HomeController::institucional` | Información académica ISTPET |
-| `GET` | `/login` | - | `AuthController::mostrarLoginDocente` | Formulario de login docente |
-| `POST`| `/login` | `usuario`, `password` | `AuthController::loginDocente` | Procesa autenticación docente |
-| `GET` | `/logout` | - | `AuthController::logoutDocente` | Destruye sesión docente |
+| `GET` | `/login` | - | `AuthController::mostrarLoginDocente` | Formulario de acceso institucional |
+| `POST`| `/login` | `usuario`, `password` | `AuthController::loginDocente` | Autenticación y redirección por rol |
+| `GET` | `/logout` | - | `AuthController::logoutDocente` | Destruye sesión institucional |
 | `GET` | `/login-estudiante` | - | `AuthController::mostrarLoginEstudiante` | Formulario de acceso alumno |
 | `POST`| `/login-estudiante` | `codigo` | `AuthController::loginEstudiante` | Autentica alumno por código |
 | `GET` | `/logout-estudiante` | - | `AuthController::logoutEstudiante` | Cierra sesión de alumno |
-| `GET` | `/dashboard` | - | `DashboardController::index` | Panel docente (Requiere docente) |
+| `GET` | `/admin` | - | `AdminController::index` | Panel institucional (Requiere Admin) |
+| `GET` | `/admin/docentes` | `buscar`, `rol` | `AdminController::docentes` | Directorio de personal (Requiere Admin) |
+| `POST`| `/admin/docentes/crear` | `nombre`, `usuario`, `password`, `rol` | `AdminController::crearDocente` | Alta de usuario (Requiere Admin) |
+| `POST`| `/admin/docentes/actualizar` | `id`, `nombre`, `usuario`, `rol`, `activo` | `AdminController::actualizarDocente` | Edición de usuario (Requiere Admin) |
+| `POST`| `/admin/docentes/resetear-password` | `id`, `password` | `AdminController::resetearPassword` | Reseteo de clave (Requiere Admin) |
+| `POST`| `/admin/docentes/cambiar-estado` | `id`, `activo` | `AdminController::cambiarEstadoDocente` | Activa/suspende cuenta (Requiere Admin) |
+| `POST`| `/admin/docentes/eliminar` | `id` | `AdminController::eliminarDocente` | Baja física controlada (Requiere Admin) |
+| `POST`| `/admin/sesion/cerrar` | `sesion_id` | `AdminController::cerrarSesionForzada` | Cierre de clase huérfana (Requiere Admin)|
+| `GET` | `/dashboard` | - | `DashboardController::index` | Panel docente (Requiere Docente) |
 | `POST`| `/dashboard/sesion/crear` | `carrera`, `nivel`, `materia` | `DashboardController::crearSesion` | Genera sesión y QR |
 | `POST`| `/dashboard/sesion/cerrar`| `sesion_id` | `DashboardController::cerrarSesion` | Cierra sesión de clase |
 | `GET` | `/estudiantes` | `buscar` (opcional) | `EstudianteController::index` | CRUD listado de alumnos |
@@ -204,11 +216,11 @@ El archivo [`public/index.php`](../public/index.php) opera como **Front Controll
 | `GET` | `/estudiante/portal` | - | `EstudianteController::portal` | Historial del estudiante |
 | `GET` | `/asistencia/escanear` | `codigo` (opcional en query) | `AsistenciaController::mostrarEscanear` | Visor de escaneo / Formulario |
 | `POST`| `/asistencia/registrar`| `codigo_sesion`, `codigo_estudiante` | `AsistenciaController::registrar` | Valida y guarda asistencia |
-| `GET` | `/reportes` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda` | `ReporteController::index` | Vista HTML con filtros |
-| `GET` | `/reportes/csv` | Filtros de fecha/materia | `ReporteController::exportarCsv` | Descarga archivo CSV |
-| `GET` | `/reportes/excel` | Filtros de fecha/materia | `ReporteController::exportarExcel` | Descarga archivo Excel .xls |
-| `GET` | `/reportes/pdf` | Filtros de fecha/materia | `ReporteController::exportarPdf` | Descarga documento PDF A4 |
-| `GET` | `/api/asistencias/activas` | - | `AsistenciaController::asistenciasActivas` | JSON para polling en vivo |
+| `GET` | `/reportes` | `fecha_inicio`, `fecha_fin`, `materia`, `busqueda`, `docente_id`, `carrera` | `ReporteController::index` | Reporte con filtros (Docente o Admin) |
+| `GET` | `/reportes/csv` | Filtros de fecha/materia/docente | `ReporteController::exportarCsv` | Descarga CSV (con columna Docente) |
+| `GET` | `/reportes/excel` | Filtros de fecha/materia/docente | `ReporteController::exportarExcel` | Descarga Excel .xls oficial |
+| `GET` | `/reportes/pdf` | Filtros de fecha/materia/docente | `ReporteController::exportarPdf` | Descarga documento PDF A4 membretado |
+| `GET` | `/api/asistencias/activas` | - | `AsistenciaController::apiListarActivas` | JSON para polling en vivo |
 
 ---
 
@@ -272,12 +284,14 @@ Utilizado por el panel del docente para actualizar la tabla de asistencias cada 
 CREATE DATABASE IF NOT EXISTS asistencia_qr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE asistencia_qr;
 
--- Tabla: docentes
+-- Tabla: docentes (Personal y Administradores)
 CREATE TABLE IF NOT EXISTS docentes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     usuario VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    rol ENUM('docente', 'admin') NOT NULL DEFAULT 'docente',
+    activo TINYINT(1) NOT NULL DEFAULT 1,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -318,3 +332,49 @@ CREATE TABLE IF NOT EXISTS asistencias (
     UNIQUE KEY unica_asistencia (sesion_id, estudiante_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
+
+---
+
+## 7. Modelo de Seguridad y Control de Acceso Basado en Roles (RBAC)
+
+El sistema implementa una arquitectura de seguridad por capas basada en sesiones PHP seguras y verificación estricta de privilegios:
+
+```text
+               ┌─────────────────────────────────────────┐
+               │         Petición HTTP entrante          │
+               └────────────────────┬────────────────────┘
+                                    ▼
+               ┌─────────────────────────────────────────┐
+               │    Front Controller (public/index.php)  │
+               └────────────────────┬────────────────────┘
+                                    ▼
+               ┌─────────────────────────────────────────┐
+               │           BaseController (RBAC)         │
+               ├─────────────────────────────────────────┤
+               │ • verificarDocente()                    │
+               │ • verificarAdmin()                      │
+               │ • esAdmin()                             │
+               └──────────┬───────────────────┬──────────┘
+                          │ (Si es admin)     │ (Si es docente)
+                          ▼                   ▼
+                 Panel de Supervisión    Panel Docente
+                 (/admin)                (/dashboard)
+```
+
+### Matriz de Permisos Institucionales:
+
+| Funcionalidad / Operación | Administrador | Docente | Estudiante |
+|---|:---:|:---:|:---:|
+| Iniciar sesión institucional (`/login`) | Sí | Sí | No |
+| Iniciar clase y generar código QR | No (Supervisa) | Sí | No |
+| Finalizar sus propias clases en vivo | Sí | Sí | No |
+| Forzar cierre de sesiones huérfanas de cualquier aula | Sí | No | No |
+| Escanear código QR y registrar asistencia | No | No | Sí |
+| Consultar expediente personal de asistencia | No | No | Sí |
+| Registrar nuevos docentes y administradores | Sí | No | No |
+| Modificar datos, roles y suspender cuentas | Sí | No | No |
+| Restablecer contraseñas con hash Bcrypt | Sí | No | No |
+| Gestionar padrón estudiantil (CRUD) | Sí | Sí | No |
+| Consultar reportes de sus asignaturas | Sí | Sí | No |
+| Generar reportes consolidados de toda la institución | Sí | No | No |
+| Exportación multiformato (CSV, Excel, PDF) con filtro docente | Sí | No | No |

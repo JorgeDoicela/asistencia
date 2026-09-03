@@ -205,6 +205,12 @@ img {
     letter-spacing: 0.5px;
 }
 
+.badge-istpet.badge-admin {
+    background: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
 .nav-links {
     display: flex;
     align-items: center;

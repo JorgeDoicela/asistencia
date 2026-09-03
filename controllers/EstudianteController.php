@@ -8,15 +8,6 @@ require_once dirname(__DIR__) . '/models/Asistencia.php';
 
 class EstudianteController extends BaseController
 {
-    private function verificarDocente(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (empty($_SESSION['docente_id'])) {
-            $this->redireccionar('/login');
-        }
-    }
 
     // Lista de estudiantes con buscador
     public function index(): void
@@ -39,6 +30,7 @@ class EstudianteController extends BaseController
             'busqueda'        => $busqueda,
             'total'           => $total,
             'siguienteCodigo' => $siguienteCodigo,
+            'esAdmin'         => self::esAdmin(),
             'mensaje'         => $mensaje,
             'error'           => $error
         ]);

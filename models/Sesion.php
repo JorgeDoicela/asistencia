@@ -76,4 +76,63 @@ class Sesion
         $fila = $stmt->fetch();
         return (int) ($fila['total'] ?? 0);
     }
+
+    // Lista todas las sesiones activas en este momento en toda la institución (Monitoreo Admin)
+    public static function listarTodasActivas(): array
+    {
+        $db = Database::conectar();
+        $sql = "SELECT s.*, d.nombre as docente_nombre, d.usuario as docente_usuario,
+                       COUNT(a.id) as total_asistencias
+                FROM sesiones s
+                JOIN docentes d ON s.docente_id = d.id
+                LEFT JOIN asistencias a ON s.id = a.sesion_id
+                WHERE s.activa = 1
+                GROUP BY s.id
+                ORDER BY s.hora_inicio DESC";
+        $stmt = $db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    // Cierre forzoso de una sesión por el Administrador (para clases olvidadas)
+    public static function cerrarPorAdmin(int $sesionId): bool
+    {
+        $db = Database::conectar();
+        $sql = "UPDATE sesiones SET activa = 0, hora_fin = CURTIME() WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        return $stmt->execute([$sesionId]);
+    }
+
+    // Cuenta cuántas clases están activas en tiempo real en la institución
+    public static function contarActivasGlobal(): int
+    {
+        $db = Database::conectar();
+        $stmt = $db->query("SELECT COUNT(*) as total FROM sesiones WHERE activa = 1");
+        $fila = $stmt->fetch();
+        return (int) ($fila['total'] ?? 0);
+    }
+
+    // Cuenta el total histórico de clases dictadas en la institución
+    public static function contarTotalInstitucional(): int
+    {
+        $db = Database::conectar();
+        $stmt = $db->query("SELECT COUNT(*) as total FROM sesiones");
+        $fila = $stmt->fetch();
+        return (int) ($fila['total'] ?? 0);
+    }
+
+    // Historial reciente institucional de clases
+    public static function listarRecientesGlobal(int $limite = 10): array
+    {
+        $db = Database::conectar();
+        $sql = "SELECT s.*, d.nombre as docente_nombre, COUNT(a.id) as total_asistencias
+                FROM sesiones s
+                JOIN docentes d ON s.docente_id = d.id
+                LEFT JOIN asistencias a ON s.id = a.sesion_id
+                GROUP BY s.id
+                ORDER BY s.id DESC
+                LIMIT " . (int)$limite;
+        $stmt = $db->query($sql);
+        return $stmt->fetchAll();
+    }
 }
+

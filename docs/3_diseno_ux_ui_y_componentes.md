@@ -19,27 +19,29 @@
 ## 2. Mapa de Flujos de Usuario e Interacción
 
 ```text
-                           [ / (Home) ]
-                      Identificación de Rol
-                       /                 \
-                      /                   \
-         [ Docentes ]                       [ Estudiantes ]
-               │                                   │
-        /login (Credenciales)                      │
-               │                                   │
-       /dashboard (Panel QR)                 /asistencia/escanear
-          │       │        \                  (Cámara o Manual)
-          │       │         \                      │
-          │       │     /reportes                  │
-          │       │  (CSV, Excel, PDF)       /asistencia/registrar
-          │       │                                │
-          │   /estudiantes                         ▼
-          │   (Gestión CRUD)             /asistencia/resultado
-          │                               (Éxito o Reintento)
-          ▼                                        │
-   Modo Proyector                                  ▼
-  (Pantalla Completa)                     /estudiante/portal
-                                         (Expediente Académico)
+                                       [ / (Home) ]
+                                   Identificación de Rol
+                                    /                 \
+                                   /                   \
+                 [ Personal Académico ]              [ Estudiantes ]
+                           │                                │
+                 /login (Credenciales)                      │
+                  /                 \                       │
+          (Rol: Admin)         (Rol: Docente)               │
+                │                    │                      │
+         /admin (Supervisión)  /dashboard (Panel QR)   /asistencia/escanear
+         ├── /admin/docentes    ├── Modo Proyector     (Cámara o Manual)
+         ├── /estudiantes       ├── /estudiantes            │
+         └── /reportes          └── /reportes               │
+             (Globales)             (Propios)          /asistencia/registrar
+                                                            │
+                                                            ▼
+                                                   /asistencia/resultado
+                                                    (Éxito o Reintento)
+                                                            │
+                                                            ▼
+                                                   /estudiante/portal
+                                                 (Expediente Académico)
 ```
 
 ---
@@ -89,6 +91,23 @@
 * **Ubicación:** `views/estudiantes/portal.php`
 * **Métricas en Tarjetas:** Total de clases asistidas, asistencias del mes actual y cantidad de materias distintas cursadas.
 
+### 3.8. Pizarra de Supervisión Institucional en Tiempo Real (Admin)
+* **Ubicación:** `views/admin/index.php`
+* **Propósito:** Brindar al personal directivo visibilidad integral de todas las clases activas en la institución en el instante exacto en que ocurren.
+* **Componentes:**
+  * Indicador de pulso animado (`pulse-badge`) para aulas transmitiendo en vivo.
+  * Tarjetas de métricas institucionales con tipografía tabular para evitar saltos de renderizado.
+  * Botón de acción inmediata con confirmación modal para forzar el cierre de sesiones olvidadas.
+  * Barras de progreso porcentual comparativo de asistencia acumulada por carrera técnica.
+
+### 3.9. Directorio Interactivo de Personal Académico y Modales (Admin)
+* **Ubicación:** `views/admin/docentes.php`
+* **Propósito:** Administrar altas, bajas lógicas, asignación de roles y credenciales del personal docente y directivo.
+* **Componentes:**
+  * Modales reactivos nativos en Vanilla JS con soporte para teclado (`ESC`), cierre al clic exterior y validación inline.
+  * Interruptores de estado de cuenta (*Activar / Desactivar*) con feedback inmediato.
+  * Modal específico de restablecimiento de contraseña con cifrado Bcrypt.
+
 ---
 
 ## 4. Adaptabilidad Móvil y Diseño Responsivo Integral
@@ -100,11 +119,13 @@ El sistema implementa una arquitectura CSS estructurada en cascada en [`public/a
 | Componente | Desktop (> 1024px) | Tablets (769px - 1024px) | Móviles Estándar (< 768px) | Pantallas Estrechas (< 480px) |
 | :--- | :--- | :--- | :--- | :--- |
 | **Barra de Navegación** | Fija a 70px, enlaces horizontales con nombre | Enlaces compactos | Auto-ajustable, enlaces con scroll táctil (`overflow-x: auto; scrollbar-width: none`), oculta nombre | Padding 10px 12px, logo 32px |
+| **Panel de Administración** | Cuadrícula fluida con métricas 4 cols y 2 cols | Cuadrícula 2 columnas | 1 columna vertical apilada | Métricas en tarjetas individuales al 100% |
+| **Directorio de Personal** | Tabla completa con botones agrupados | Tabla con scroll horizontal | Contenedor `.table-responsive` | Botones de acción compactos `.btn-sm` |
 | **Panel Docente (Dashboard)** | Cuadrícula 2 columnas (`360px 1fr`) | Cuadrícula 2 columnas (`320px 1fr`) | Colapso a 1 columna vertical apilada | 1 columna, botones al 100% |
 | **Modo Proyector de Aula** | Modal centrado de 620px con QR de 280px | Modal 560px con QR de 240px | Ancho 95vw, alto máx 90vh con scroll interno, QR autoajustable a 210px | Tipografía de código con `clamp(1.4rem, 5vw, 2.1rem)` |
 | **Tablas de Datos (En vivo, CRUD, Reportes)** | Tabla completa con encabezados fijos | Tabla completa adaptable | Contenedor `.table-responsive` con scroll horizontal táctil inercial (`-webkit-overflow-scrolling: touch`) | Celdas compactas, botones de acción optimizados para dedos |
-| **Tarjetas Métricas (`.stats-grid`)** | Cuadrícula de 3 columnas | Cuadrícula de 3 columnas | Cuadrícula de 1 columna vertical | Valores escalados a 1.8rem para evitar cortes numéricos |
-| **Formularios de Filtros** | Cuadrícula fluida de 4 columnas horizontales | Cuadrícula de 2 a 4 columnas | 1 columna vertical apilada | Botones de acción (`Filtrar` / `Limpiar`) al 100% |
+| **Tarjetas Métricas (`.stats-grid`)** | Cuadrícula de 3 a 4 columnas | Cuadrícula de 2 a 3 columnas | Cuadrícula de 1 columna vertical | Valores escalados a 1.8rem para evitar cortes numéricos |
+| **Formularios de Filtros** | Cuadrícula fluida de 4 a 6 columnas horizontales | Cuadrícula de 2 a 4 columnas | 1 columna vertical apilada | Botones de acción (`Filtrar` / `Limpiar`) al 100% |
 | **Tarjetas de Autenticación (`.auth-card`)** | Centrado con máx 440px y padding de 44px | Centrado con máx 440px | Ancho al 100% con padding de 26px | Asistente de credenciales apilado verticalmente |
 | **Escáner HUD de Cámara** | Visor de 280px con marco láser | Visor de 280px | Visor adaptativo a 240px de altura | Campos de entrada con `font-size: 1.05rem` centrado |
 | **Pantalla de Inicio (`/`)** | Cuadrícula de 2 roles con padding de 38px | 2 columnas | 1 columna vertical con padding de 26px | Título fluido escalable con `clamp(1.5rem, 5.5vw, 2rem)` |

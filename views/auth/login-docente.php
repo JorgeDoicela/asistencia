@@ -14,8 +14,8 @@ require dirname(__DIR__) . '/layouts/header.php';
         <!-- Logo Institucional Original -->
         <div class="auth-logo-wrap">
             <img src="<?= $base ?>/assets/img/logo-istpet.jpg" alt="Logo ISTPET" class="auth-logo-img">
-            <h2 class="auth-title">Acceso Docentes</h2>
-            <p class="auth-subtitle">Ingresa tus credenciales para administrar tus clases</p>
+            <h2 class="auth-title">Acceso Institucional</h2>
+            <p class="auth-subtitle">Ingresa tus credenciales de Docente o Administrador</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -24,21 +24,30 @@ require dirname(__DIR__) . '/layouts/header.php';
             </div>
         <?php endif; ?>
 
-        <!-- Asistente de Credenciales para Evaluacion -->
-        <div class="demo-credentials-box">
-            <div class="demo-credentials-info">
-                <strong>Docente Demo:</strong><br>
-                Usuario: <code>profesor</code> &bull; Clave: <code>12345</code>
+        <!-- Asistente de Credenciales para Evaluación -->
+        <div class="demo-credentials-box" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div class="d-flex justify-content-between align-center">
+                <div class="demo-credentials-info">
+                    <strong>Administrador:</strong> <code>admin</code> / <code>admin123</code>
+                </div>
+                <button type="button" onclick="cargarAdmin()" class="demo-credentials-btn">
+                    Cargar Admin
+                </button>
             </div>
-            <button type="button" onclick="cargarDemo()" class="demo-credentials-btn">
-                Autocompletar
-            </button>
+            <div class="d-flex justify-content-between align-center pt-2" style="border-top: 1px dashed var(--color-border);">
+                <div class="demo-credentials-info">
+                    <strong>Docente Titular:</strong> <code>profesor</code> / <code>12345</code>
+                </div>
+                <button type="button" onclick="cargarDocente()" class="demo-credentials-btn">
+                    Cargar Docente
+                </button>
+            </div>
         </div>
 
         <form action="<?= $base ?>/login" method="POST">
             <div class="form-group">
-                <label for="usuario" class="form-label">Usuario del Docente <span class="text-danger">*</span></label>
-                <input type="text" id="usuario" name="usuario" class="form-control" required autofocus minlength="3" maxlength="30" placeholder="Ej: profesor o Demo" autocomplete="username">
+                <label for="usuario" class="form-label">Usuario Institucional <span class="text-danger">*</span></label>
+                <input type="text" id="usuario" name="usuario" class="form-control" required autofocus minlength="3" maxlength="30" placeholder="Ej: admin o profesor" autocomplete="username">
             </div>
 
             <div class="form-group mb-6">
@@ -47,7 +56,7 @@ require dirname(__DIR__) . '/layouts/header.php';
             </div>
 
             <button type="submit" class="btn btn-primary btn-block btn-lg">
-                Ingresar al Panel Docente &rarr;
+                Ingresar al Sistema &rarr;
             </button>
         </form>
 
@@ -58,7 +67,12 @@ require dirname(__DIR__) . '/layouts/header.php';
 </div>
 
 <script>
-function cargarDemo() {
+function cargarAdmin() {
+    document.getElementById('usuario').value = 'admin';
+    document.getElementById('password').value = 'admin123';
+}
+
+function cargarDocente() {
     document.getElementById('usuario').value = 'profesor';
     document.getElementById('password').value = '12345';
 }

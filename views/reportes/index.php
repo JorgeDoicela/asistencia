@@ -2,16 +2,31 @@
 $titulo = 'Reportes de Asistencia - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
 
-$queryExport = http_build_query([
+$esAdmin = $esAdmin ?? false;
+
+$paramsExport = [
     'fecha_inicio' => $filtros['fecha_inicio'] ?? '',
     'fecha_fin'    => $filtros['fecha_fin'] ?? '',
     'materia'      => $filtros['materia'] ?? '',
     'busqueda'     => $filtros['busqueda'] ?? ''
-]);
+];
+
+if ($esAdmin) {
+    if (!empty($filtros['docente_id'])) {
+        $paramsExport['docente_id'] = $filtros['docente_id'];
+    }
+    if (!empty($filtros['carrera'])) {
+        $paramsExport['carrera'] = $filtros['carrera'];
+    }
+}
+
+$queryExport = http_build_query($paramsExport);
 ?>
 
 <nav class="breadcrumb">
-    <a href="<?= $base ?>/dashboard">Panel Docente</a>
+    <a href="<?= $base ?><?= $esAdmin ? '/admin' : '/dashboard' ?>">
+        <?= $esAdmin ? 'Panel Administración' : 'Panel Docente' ?>
+    </a>
     <span class="breadcrumb-separator">/</span>
     <span class="breadcrumb-current">Reportes de Asistencia</span>
 </nav>
@@ -19,12 +34,14 @@ $queryExport = http_build_query([
 <div class="page-header">
     <div>
         <h1 class="page-title">Reportes de Asistencia</h1>
-        <p class="page-subtitle">Filtra, consulta y exporta los registros de asistencia académica</p>
+        <p class="page-subtitle">
+            <?= $esAdmin ? 'Auditoría y exportación consolidada de asistencia institucional' : 'Filtra, consulta y exporta los registros de asistencia académica de tus materias' ?>
+        </p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a href="<?= $base ?>/dashboard" class="btn btn-back" title="Regresar al panel principal">
+        <a href="<?= $base ?><?= $esAdmin ? '/admin' : '/dashboard' ?>" class="btn btn-back" title="Regresar al panel principal">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Volver al Panel QR
+            <?= $esAdmin ? 'Volver a Supervisión' : 'Volver al Panel QR' ?>
         </a>
 
         <a href="<?= $base ?>/reportes/csv?<?= $queryExport ?>" 
@@ -47,7 +64,7 @@ $queryExport = http_build_query([
     </div>
 </div>
 
-<!-- Formulario de Filtros -->
+<!-- Formulario de Filtros Multicriterio -->
 <div class="card card-filter mb-6">
     <div class="d-flex justify-content-between align-center flex-wrap gap-2 mb-3">
         <span class="text-primary font-bold" style="font-size: 0.95rem;">Filtros de Búsqueda</span>
@@ -73,6 +90,31 @@ $queryExport = http_build_query([
                    value="<?= htmlspecialchars($filtros['fecha_fin'] ?? '') ?>" class="form-control">
         </div>
 
+        <?php if ($esAdmin): ?>
+            <div class="form-group mb-0">
+                <label for="docente_id" class="form-label">Docente</label>
+                <select id="docente_id" name="docente_id" class="form-select">
+                    <option value="">-- Todos los Docentes --</option>
+                    <?php foreach ($docentes as $d): ?>
+                        <option value="<?= (int)$d['id'] ?>" <?= ((int)($filtros['docente_id'] ?? 0) === (int)$d['id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($d['nombre']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-group mb-0">
+                <label for="carrera" class="form-label">Carrera</label>
+                <select id="carrera" name="carrera" class="form-select">
+                    <option value="">-- Todas las Carreras --</option>
+                    <option value="Desarrollo de Software" <?= ($filtros['carrera'] ?? '') === 'Desarrollo de Software' ? 'selected' : '' ?>>Desarrollo de Software</option>
+                    <option value="Mecanica Automotriz" <?= ($filtros['carrera'] ?? '') === 'Mecanica Automotriz' ? 'selected' : '' ?>>Mecanica Automotriz</option>
+                    <option value="Entrenamiento Deportivo" <?= ($filtros['carrera'] ?? '') === 'Entrenamiento Deportivo' ? 'selected' : '' ?>>Entrenamiento Deportivo</option>
+                    <option value="Educacion Inicial" <?= ($filtros['carrera'] ?? '') === 'Educacion Inicial' ? 'selected' : '' ?>>Educacion Inicial</option>
+                </select>
+            </div>
+        <?php endif; ?>
+
         <div class="form-group mb-0">
             <label for="materia" class="form-label">Materia</label>
             <input type="text" id="materia" name="materia" 
@@ -94,10 +136,20 @@ $queryExport = http_build_query([
     </form>
 
     <?php 
-    $hayFiltrosActivos = !empty($filtros['materia']) || !empty($filtros['busqueda']) || (!empty($filtros['fecha_inicio']) && $filtros['fecha_inicio'] !== date('Y-m-01'));
+    $hayFiltrosActivos = !empty($filtros['materia']) || !empty($filtros['busqueda']) || !empty($filtros['carrera']) || !empty($filtros['docente_id']) || (!empty($filtros['fecha_inicio']) && $filtros['fecha_inicio'] !== date('Y-m-01'));
     if ($hayFiltrosActivos): ?>
         <div class="d-flex gap-2 flex-wrap align-center mt-3 pt-3" style="border-top: 1px dashed var(--color-border);">
             <span class="text-muted" style="font-size: 0.8rem; font-weight: 600;">Filtros activos:</span>
+            <?php if (!empty($filtros['docente_id'])): ?>
+                <span class="filter-pill">
+                    Docente ID: <?= (int)$filtros['docente_id'] ?>
+                </span>
+            <?php endif; ?>
+            <?php if (!empty($filtros['carrera'])): ?>
+                <span class="filter-pill">
+                    Carrera: <?= htmlspecialchars($filtros['carrera']) ?>
+                </span>
+            <?php endif; ?>
             <?php if (!empty($filtros['materia'])): ?>
                 <span class="filter-pill">
                     Materia: <?= htmlspecialchars($filtros['materia']) ?>
@@ -176,7 +228,7 @@ function establecerPeriodo(tipo) {
                 <tr>
                     <th>Fecha</th>
                     <th>Hora</th>
-                    <th>Codigo</th>
+                    <th>Código</th>
                     <th>Estudiante</th>
                     <th>Carrera</th>
                     <th>Materia</th>

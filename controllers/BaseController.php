@@ -39,4 +39,47 @@ class BaseController
         $dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
         return ($dir === '/' || empty($dir)) ? '' : $dir;
     }
+
+    // Inicia la sesión PHP si no ha sido iniciada previamente
+    protected function iniciarSesion(): void
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    // Verifica que el usuario tenga sesión activa (docente o administrador)
+    protected function verificarDocente(): void
+    {
+        $this->iniciarSesion();
+        if (empty($_SESSION['usuario_id']) && empty($_SESSION['docente_id'])) {
+            $this->redireccionar('/login');
+        }
+    }
+
+    // Verifica que el usuario tenga el rol de Administrador
+    protected function verificarAdmin(): void
+    {
+        $this->iniciarSesion();
+        $rol = $_SESSION['usuario_rol'] ?? $_SESSION['docente_rol'] ?? '';
+
+        if (empty($_SESSION['usuario_id']) && empty($_SESSION['docente_id'])) {
+            $_SESSION['flash_error'] = 'Debe iniciar sesión para acceder al panel de administración.';
+            $this->redireccionar('/login');
+        }
+
+        if ($rol !== 'admin') {
+            $_SESSION['flash_error'] = 'Acceso denegado: se requieren permisos de Administrador.';
+            $this->redireccionar('/dashboard');
+        }
+    }
+
+    // Retorna verdadero si el usuario en sesión es Administrador
+    public static function esAdmin(): bool
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        return ($_SESSION['usuario_rol'] ?? $_SESSION['docente_rol'] ?? '') === 'admin';
+    }
 }

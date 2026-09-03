@@ -20,7 +20,29 @@ $rutaActual = '/' . trim($uriActual, '/');
 </head>
 <body class="<?= htmlspecialchars($bodyClass ?? '') ?>">
 
-<?php if (!empty($_SESSION['docente_id']) && empty($ocultarNavbar)): ?>
+<?php 
+$rolActual = $_SESSION['usuario_rol'] ?? $_SESSION['docente_rol'] ?? '';
+if (!empty($_SESSION['docente_id']) && empty($ocultarNavbar) && $rolActual === 'admin'): 
+?>
+<!-- Barra de Navegación del Administrador Institucional -->
+<nav class="navbar">
+    <a href="<?= $base ?>/admin" class="navbar-brand">
+        <img src="<?= $base ?>/assets/img/logo-istpet.jpg" alt="ISTPET" style="height: 38px; width: auto; border-radius: 4px;">
+        <span>ISTPET</span>
+        <span class="badge-istpet badge-admin">ADMINISTRADOR</span>
+    </a>
+    <ul class="nav-links">
+        <li><a href="<?= $base ?>/admin" class="nav-link <?= $rutaActual === '/admin' ? 'active' : '' ?>">Supervisión</a></li>
+        <li><a href="<?= $base ?>/admin/docentes" class="nav-link <?= str_starts_with($rutaActual, '/admin/docentes') ? 'active' : '' ?>">Docentes</a></li>
+        <li><a href="<?= $base ?>/estudiantes" class="nav-link <?= str_starts_with($rutaActual, '/estudiantes') ? 'active' : '' ?>">Estudiantes</a></li>
+        <li><a href="<?= $base ?>/reportes" class="nav-link <?= str_starts_with($rutaActual, '/reportes') ? 'active' : '' ?>">Reportes Globales</a></li>
+        <li class="nav-user">
+            <span class="user-name"><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? $_SESSION['docente_nombre'] ?? 'Administrador') ?></span>
+            <a href="<?= $base ?>/logout" class="btn-logout" title="Cerrar sesión de administrador">Cerrar Sesión</a>
+        </li>
+    </ul>
+</nav>
+<?php elseif (!empty($_SESSION['docente_id']) && empty($ocultarNavbar)): ?>
 <!-- Barra de Navegación del Docente -->
 <nav class="navbar">
     <a href="<?= $base ?>/dashboard" class="navbar-brand">

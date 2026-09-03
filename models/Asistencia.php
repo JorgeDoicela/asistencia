@@ -55,8 +55,8 @@ class Asistencia
         return $stmt->fetchAll();
     }
 
-    // Filtra las asistencias segun criterios para la pantalla de Reportes
-    public static function filtrar(int $docenteId, ?string $inicio, ?string $fin, ?string $materia, ?string $busqueda): array
+    // Filtra las asistencias según criterios para la pantalla de Reportes (Docente o Admin Global)
+    public static function filtrar(?int $docenteId, ?string $inicio, ?string $fin, ?string $materia, ?string $busqueda, ?string $carrera = null): array
     {
         $db = Database::conectar();
 
@@ -66,9 +66,20 @@ class Asistencia
                 JOIN estudiantes e ON a.estudiante_id = e.id
                 JOIN sesiones s ON a.sesion_id = s.id
                 JOIN docentes d ON s.docente_id = d.id
-                WHERE s.docente_id = ?";
+                WHERE 1=1";
         
-        $parametros = [$docenteId];
+        $parametros = [];
+
+        // Si se especifica un docente puntual (o si es una consulta de rol Docente)
+        if (!empty($docenteId) && $docenteId > 0) {
+            $sql .= " AND s.docente_id = ?";
+            $parametros[] = $docenteId;
+        }
+
+        if (!empty($carrera)) {
+            $sql .= " AND e.carrera = ?";
+            $parametros[] = $carrera;
+        }
 
         if (!empty($inicio)) {
             $sql .= " AND a.fecha >= ?";
@@ -99,7 +110,7 @@ class Asistencia
         return $stmt->fetchAll();
     }
 
-    // Cuenta cuantas asistencias se han registrado hoy en las materias del docente
+    // Cuenta cuántas asistencias se han registrado hoy en las materias del docente
     public static function contarHoyPorDocente(int $docenteId): int
     {
         $db = Database::conectar();
@@ -111,5 +122,37 @@ class Asistencia
         $stmt->execute([$docenteId]);
         $fila = $stmt->fetch();
         return (int) ($fila['total'] ?? 0);
+    }
+
+    // Cuenta cuántas asistencias se han registrado hoy en toda la institución (Admin)
+    public static function contarHoyGlobal(): int
+    {
+        $db = Database::conectar();
+        $stmt = $db->query("SELECT COUNT(*) as total FROM asistencias WHERE fecha = CURDATE()");
+        $fila = $stmt->fetch();
+        return (int) ($fila['total'] ?? 0);
+    }
+
+    // Cuenta el total histórico de asistencias en la institución (Admin)
+    public static function contarTotalGlobal(): int
+    {
+        $db = Database::conectar();
+        $stmt = $db->query("SELECT COUNT(*) as total FROM asistencias");
+        $fila = $stmt->fetch();
+        return (int) ($fila['total'] ?? 0);
+    }
+
+    // Obtiene la distribución de asistencias por carrera institucional
+    public static function contarPorCarrera(): array
+    {
+        $db = Database::conectar();
+        $sql = "SELECT e.carrera, COUNT(a.id) as total
+                FROM estudiantes e
+                LEFT JOIN asistencias a ON e.id = a.estudiante_id
+                WHERE e.carrera IS NOT NULL AND e.carrera != ''
+                GROUP BY e.carrera
+                ORDER BY total DESC";
+        $stmt = $db->query($sql);
+        return $stmt->fetchAll();
     }
 }

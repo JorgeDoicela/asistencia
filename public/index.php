@@ -18,6 +18,7 @@ require_once dirname(__DIR__) . '/controllers/DashboardController.php';
 require_once dirname(__DIR__) . '/controllers/EstudianteController.php';
 require_once dirname(__DIR__) . '/controllers/AsistenciaController.php';
 require_once dirname(__DIR__) . '/controllers/ReporteController.php';
+require_once dirname(__DIR__) . '/controllers/AdminController.php';
 
 // 2. Obtener la ruta solicitada por el usuario
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -119,6 +120,32 @@ switch ("{$metodo} {$ruta}") {
         break;
     case 'GET /reportes/pdf':
         (new ReporteController())->exportarPdf();
+        break;
+
+    // Panel de Administrador y Gestión Institucional (RBAC)
+    case 'GET /admin':
+        (new AdminController())->index();
+        break;
+    case 'GET /admin/docentes':
+        (new AdminController())->docentes();
+        break;
+    case 'POST /admin/docentes/crear':
+        (new AdminController())->crearDocente();
+        break;
+    case 'POST /admin/docentes/actualizar':
+        (new AdminController())->actualizarDocente();
+        break;
+    case 'POST /admin/docentes/resetear-password':
+        (new AdminController())->resetearPassword();
+        break;
+    case 'POST /admin/docentes/cambiar-estado':
+        (new AdminController())->cambiarEstadoDocente();
+        break;
+    case 'POST /admin/docentes/eliminar':
+        (new AdminController())->eliminarDocente();
+        break;
+    case 'POST /admin/sesion/cerrar':
+        (new AdminController())->cerrarSesionForzada();
         break;
 
     // Ruta no encontrada (404)

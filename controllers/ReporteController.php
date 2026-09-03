@@ -2,40 +2,47 @@
 
 require_once __DIR__ . '/BaseController.php';
 require_once dirname(__DIR__) . '/models/Asistencia.php';
+require_once dirname(__DIR__) . '/models/Docente.php';
 
-// Controlador de Reportes: Filtra asistencias y genera la exportacion en CSV para Excel
+// Controlador de Reportes: Filtra asistencias y genera exportaciones (CSV, Excel, PDF)
 
 class ReporteController extends BaseController
 {
-    private function verificarDocente(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (empty($_SESSION['docente_id'])) {
-            $this->redireccionar('/login');
-        }
-    }
-
     public function index(): void
     {
         $this->verificarDocente();
-        $docenteId = (int)$_SESSION['docente_id'];
+        $esAdmin = self::esAdmin();
 
-        // Obtener filtros desde la URL
+        // Parámetros de filtrado
         $fechaInicio = $_GET['fecha_inicio'] ?? date('Y-m-01');
         $fechaFin    = $_GET['fecha_fin'] ?? date('Y-m-d');
         $materia     = trim($_GET['materia'] ?? '');
         $busqueda    = trim($_GET['busqueda'] ?? '');
+        $carrera     = trim($_GET['carrera'] ?? '');
 
-        // Consultar al modelo Asistencia
-        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
+        $docenteId = null;
+        $docentes = [];
+
+        if ($esAdmin) {
+            $docentes = Docente::listar('', 'docente');
+            $docenteSeleccionado = filter_var($_GET['docente_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($docenteSeleccionado && $docenteSeleccionado > 0) {
+                $docenteId = $docenteSeleccionado;
+            }
+        } else {
+            $docenteId = (int)$_SESSION['docente_id'];
+        }
+
+        // Consultar asistencias al modelo
+        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda, $carrera);
 
         $filtros = [
             'fecha_inicio' => $fechaInicio,
             'fecha_fin'    => $fechaFin,
             'materia'      => $materia,
-            'busqueda'     => $busqueda
+            'busqueda'     => $busqueda,
+            'carrera'      => $carrera,
+            'docente_id'   => $docenteId
         ];
 
         $this->vista('reportes.index', [
@@ -46,6 +53,10 @@ class ReporteController extends BaseController
             'fechaFin'     => $fechaFin,
             'materia'      => $materia,
             'busqueda'     => $busqueda,
+            'carrera'      => $carrera,
+            'docenteId'    => $docenteId,
+            'docentes'     => $docentes,
+            'esAdmin'      => $esAdmin,
             'total'        => count($asistencias)
         ]);
     }
@@ -53,18 +64,28 @@ class ReporteController extends BaseController
     public function exportarCsv(): void
     {
         $this->verificarDocente();
-        $docenteId = (int)$_SESSION['docente_id'];
+        $esAdmin = self::esAdmin();
 
         $fechaInicio = !empty($_GET['fecha_inicio']) ? trim($_GET['fecha_inicio']) : null;
         $fechaFin    = !empty($_GET['fecha_fin']) ? trim($_GET['fecha_fin']) : null;
         $materia     = trim($_GET['materia'] ?? '');
         $busqueda    = trim($_GET['busqueda'] ?? '');
+        $carrera     = trim($_GET['carrera'] ?? '');
 
-        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
+        $docenteId = null;
+        if ($esAdmin) {
+            $docenteSel = filter_var($_GET['docente_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($docenteSel && $docenteSel > 0) {
+                $docenteId = $docenteSel;
+            }
+        } else {
+            $docenteId = (int)$_SESSION['docente_id'];
+        }
+
+        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda, $carrera);
 
         $nombreArchivo = 'asistencias_' . date('Ymd_His') . '.csv';
 
-        // Limpiar cualquier búfer de salida previo para evitar corrupción del archivo CSV
         if (ob_get_level()) {
             ob_end_clean();
         }
@@ -76,15 +97,19 @@ class ReporteController extends BaseController
 
         $salida = fopen('php://output', 'w');
 
-        // Agregar compatibilidad con Microsoft Excel (BOM UTF-8)
+        // BOM UTF-8 para compatibilidad con Excel
         fprintf($salida, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        // Escribir cabecera del archivo
-        fputcsv($salida, ['ID', 'Fecha', 'Hora', 'Codigo', 'Estudiante', 'Carrera', 'Materia / Sesion', 'Codigo Sesion']);
+        // Cabeceras del CSV
+        $cabecera = ['ID', 'Fecha', 'Hora', 'Codigo', 'Estudiante', 'Carrera', 'Materia / Sesion', 'Codigo Sesion'];
+        if ($esAdmin) {
+            $cabecera[] = 'Docente';
+        }
+        fputcsv($salida, $cabecera);
 
-        // Escribir filas de datos
+        // Filas de datos
         foreach ($asistencias as $fila) {
-            fputcsv($salida, [
+            $linea = [
                 $fila['id'] ?? '',
                 $fila['fecha'] ?? '',
                 $fila['hora'] ?? '',
@@ -93,7 +118,11 @@ class ReporteController extends BaseController
                 $fila['carrera'] ?? '',
                 $fila['materia'] ?? '',
                 $fila['codigo_sesion'] ?? ''
-            ]);
+            ];
+            if ($esAdmin) {
+                $linea[] = $fila['docente'] ?? '';
+            }
+            fputcsv($salida, $linea);
         }
 
         fclose($salida);
@@ -103,14 +132,25 @@ class ReporteController extends BaseController
     public function exportarExcel(): void
     {
         $this->verificarDocente();
-        $docenteId = (int)$_SESSION['docente_id'];
+        $esAdmin = self::esAdmin();
 
         $fechaInicio = !empty($_GET['fecha_inicio']) ? trim($_GET['fecha_inicio']) : null;
         $fechaFin    = !empty($_GET['fecha_fin']) ? trim($_GET['fecha_fin']) : null;
         $materia     = trim($_GET['materia'] ?? '');
         $busqueda    = trim($_GET['busqueda'] ?? '');
+        $carrera     = trim($_GET['carrera'] ?? '');
 
-        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
+        $docenteId = null;
+        if ($esAdmin) {
+            $docenteSel = filter_var($_GET['docente_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($docenteSel && $docenteSel > 0) {
+                $docenteId = $docenteSel;
+            }
+        } else {
+            $docenteId = (int)$_SESSION['docente_id'];
+        }
+
+        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda, $carrera);
 
         $nombreArchivo = 'asistencias_' . date('Ymd_His') . '.xls';
 
@@ -127,29 +167,32 @@ class ReporteController extends BaseController
         echo '<head><meta charset="utf-8">';
         echo '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Asistencias</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
         echo '<style>
-            .titulo-instituto { font-family: Calibri, Arial, sans-serif; font-size: 15pt; font-weight: bold; color: #1A2B4C; }
-            .subtitulo { font-family: Calibri, Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #B8912E; }
+            .titulo-instituto { font-family: Calibri, Arial, sans-serif; font-size: 15pt; font-weight: bold; color: #2C356D; }
+            .subtitulo { font-family: Calibri, Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #B79B4A; }
             .meta { font-family: Calibri, Arial, sans-serif; font-size: 9.5pt; color: #475569; }
-            .th-header { background-color: #1A2B4C; color: #FFFFFF; font-family: Calibri, Arial, sans-serif; font-size: 10pt; font-weight: bold; text-align: center; border: 1px solid #CBD5E1; height: 28px; }
+            .th-header { background-color: #2C356D; color: #FFFFFF; font-family: Calibri, Arial, sans-serif; font-size: 10pt; font-weight: bold; text-align: center; border: 1px solid #CBD5E1; height: 28px; }
             .td-cell { font-family: Calibri, Arial, sans-serif; font-size: 9.5pt; border: 1px solid #E2E8F0; padding: 6px; }
             .td-center { text-align: center; }
-            .td-code { text-align: center; font-weight: bold; color: #1A2B4C; mso-number-format:"\@"; }
+            .td-code { text-align: center; font-weight: bold; color: #2C356D; mso-number-format:"\@"; }
             .td-date { text-align: center; mso-number-format:"yyyy-mm-dd"; }
             .td-time { text-align: center; mso-number-format:"hh:mm:ss"; }
             .zebra { background-color: #F8FAFC; }
         </style>';
         echo '</head><body>';
         echo '<table border="0" cellpadding="4" cellspacing="0">';
-        echo '<tr><td colspan="7" class="titulo-instituto">INSTITUTO SUPERIOR TECNOLÓGICO MAYOR PEDRO TRAVERSARI</td></tr>';
-        echo '<tr><td colspan="7" class="subtitulo">SISTEMA INTEGRAL DE CONTROL DE ASISTENCIA — REPORTE OFICIAL</td></tr>';
-        echo '<tr><td colspan="7" class="meta">Fecha de Emisión: ' . date('d/m/Y H:i:s') . ' | Total de registros: ' . count($asistencias) . '</td></tr>';
+        echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="titulo-instituto">INSTITUTO SUPERIOR TECNOLÓGICO MAYOR PEDRO TRAVERSARI</td></tr>';
+        echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="subtitulo">SISTEMA INTEGRAL DE CONTROL DE ASISTENCIA — REPORTE OFICIAL</td></tr>';
+        echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="meta">Fecha de Emisión: ' . date('d/m/Y H:i:s') . ' | Total de registros: ' . count($asistencias) . '</td></tr>';
         if (!empty($fechaInicio) || !empty($fechaFin)) {
-            echo '<tr><td colspan="7" class="meta">Periodo: ' . htmlspecialchars($fechaInicio ?? 'Inicio') . ' al ' . htmlspecialchars($fechaFin ?? 'Hoy') . '</td></tr>';
+            echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="meta">Periodo: ' . htmlspecialchars($fechaInicio ?? 'Inicio') . ' al ' . htmlspecialchars($fechaFin ?? 'Hoy') . '</td></tr>';
         }
         if (!empty($materia)) {
-            echo '<tr><td colspan="7" class="meta">Materia: ' . htmlspecialchars($materia) . '</td></tr>';
+            echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="meta">Materia: ' . htmlspecialchars($materia) . '</td></tr>';
         }
-        echo '<tr><td colspan="7"></td></tr>';
+        if (!empty($carrera)) {
+            echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="meta">Carrera: ' . htmlspecialchars($carrera) . '</td></tr>';
+        }
+        echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '"></td></tr>';
 
         echo '<thead><tr>';
         echo '<th class="th-header" style="width: 100px;">Fecha</th>';
@@ -158,12 +201,15 @@ class ReporteController extends BaseController
         echo '<th class="th-header" style="width: 260px;">Estudiante</th>';
         echo '<th class="th-header" style="width: 220px;">Carrera</th>';
         echo '<th class="th-header" style="width: 220px;">Materia</th>';
+        if ($esAdmin) {
+            echo '<th class="th-header" style="width: 200px;">Docente</th>';
+        }
         echo '<th class="th-header" style="width: 120px;">Código Sesión</th>';
         echo '</tr></thead>';
 
         echo '<tbody>';
         if (empty($asistencias)) {
-            echo '<tr><td colspan="7" class="td-cell td-center" style="color: #64748B; font-style: italic;">No se encontraron asistencias para los criterios seleccionados.</td></tr>';
+            echo '<tr><td colspan="' . ($esAdmin ? 8 : 7) . '" class="td-cell td-center" style="color: #64748B; font-style: italic;">No se encontraron asistencias para los criterios seleccionados.</td></tr>';
         } else {
             $esZebra = false;
             foreach ($asistencias as $fila) {
@@ -175,6 +221,9 @@ class ReporteController extends BaseController
                 echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['estudiante'] ?? '') . '</td>';
                 echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['carrera'] ?? '') . '</td>';
                 echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['materia'] ?? '') . '</td>';
+                if ($esAdmin) {
+                    echo '<td class="td-cell' . $claseZebra . '">' . htmlspecialchars($fila['docente'] ?? '') . '</td>';
+                }
                 echo '<td class="td-cell td-center' . $claseZebra . '">' . htmlspecialchars($fila['codigo_sesion'] ?? '') . '</td>';
                 echo '</tr>';
                 $esZebra = !$esZebra;
@@ -187,15 +236,31 @@ class ReporteController extends BaseController
     public function exportarPdf(): void
     {
         $this->verificarDocente();
-        $docenteId = (int)$_SESSION['docente_id'];
-        $docenteNombre = $_SESSION['docente_nombre'] ?? 'Docente ISTPET';
+        $esAdmin = self::esAdmin();
+
+        $docenteNombre = $esAdmin ? 'Supervisión Institucional' : ($_SESSION['docente_nombre'] ?? 'Docente ISTPET');
 
         $fechaInicio = !empty($_GET['fecha_inicio']) ? trim($_GET['fecha_inicio']) : null;
         $fechaFin    = !empty($_GET['fecha_fin']) ? trim($_GET['fecha_fin']) : null;
         $materia     = trim($_GET['materia'] ?? '');
         $busqueda    = trim($_GET['busqueda'] ?? '');
+        $carrera     = trim($_GET['carrera'] ?? '');
 
-        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda);
+        $docenteId = null;
+        if ($esAdmin) {
+            $docenteSel = filter_var($_GET['docente_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($docenteSel && $docenteSel > 0) {
+                $docenteId = $docenteSel;
+                $docEncontrado = Docente::buscarPorId($docenteId);
+                if ($docEncontrado) {
+                    $docenteNombre = $docEncontrado['nombre'];
+                }
+            }
+        } else {
+            $docenteId = (int)$_SESSION['docente_id'];
+        }
+
+        $asistencias = Asistencia::filtrar($docenteId, $fechaInicio, $fechaFin, $materia, $busqueda, $carrera);
 
         require_once dirname(__DIR__) . '/libs/ReportePdf.php';
 
@@ -221,7 +286,7 @@ class ReporteController extends BaseController
             $fill = false;
             foreach ($asistencias as $fila) {
                 if ($fill) {
-                    $pdf->SetFillColor(248, 250, 252); // Fondo alterno
+                    $pdf->SetFillColor(248, 250, 252);
                 } else {
                     $pdf->SetFillColor(255, 255, 255);
                 }

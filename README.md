@@ -115,11 +115,12 @@ Ideal si solo tienes instalado el motor MySQL oficial con MySQL Workbench:
 
 ## Credenciales de Acceso
 
-| Rol | Usuario / Código | Contraseña |
-|---|---|---|
-| Docente Titular | `profesor` | `12345` |
-| Docente Demo | `Demo` | `Demo123` |
-| Estudiantes | `EST001` a `EST008` | (Solo requiere el código institucional) |
+| Rol | Usuario / Código | Contraseña | Funcionalidad Principal |
+|---|---|---|---|
+| **Administrador General** | `admin` | `admin123` | Supervisión global, personal docente, reportes consolidados y cierre forzado |
+| **Docente Titular** | `profesor` | `12345` | Generación de QR en vivo, monitoreo de aula y reportes propios |
+| **Docente Demo** | `Demo` | `Demo123` | Docente secundario para pruebas multiusuario |
+| **Estudiantes** | `EST001` a `EST008` | *(Ingreso directo con código)* | Escaneo QR y expediente histórico personal |
 
 ---
 

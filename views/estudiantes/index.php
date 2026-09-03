@@ -1,10 +1,13 @@
 <?php
 $titulo = 'Gestion de Estudiantes - ISTPET';
 require dirname(__DIR__) . '/layouts/header.php';
+$esAdmin = $esAdmin ?? false;
 ?>
 
 <nav class="breadcrumb">
-    <a href="<?= $base ?>/dashboard">Panel Docente</a>
+    <a href="<?= $base ?><?= $esAdmin ? '/admin' : '/dashboard' ?>">
+        <?= $esAdmin ? 'Panel Administración' : 'Panel Docente' ?>
+    </a>
     <span class="breadcrumb-separator">/</span>
     <span class="breadcrumb-current">Gestión de Estudiantes</span>
 </nav>
@@ -15,9 +18,9 @@ require dirname(__DIR__) . '/layouts/header.php';
         <p class="page-subtitle">Total de estudiantes registrados: <strong><?= $total ?></strong></p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a href="<?= $base ?>/dashboard" class="btn btn-back" title="Regresar al panel principal">
+        <a href="<?= $base ?><?= $esAdmin ? '/admin' : '/dashboard' ?>" class="btn btn-back" title="Regresar al panel principal">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Volver al Panel QR
+            <?= $esAdmin ? 'Volver a Supervisión' : 'Volver al Panel QR' ?>
         </a>
         <button onclick="abrirModalCrear()" class="btn btn-primary">
             + Registrar Nuevo Estudiante
